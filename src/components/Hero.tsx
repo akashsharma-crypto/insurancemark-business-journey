@@ -28,13 +28,14 @@ const PERSONAL_LOB_ITEMS = [
 ];
 
 const BUSINESS_LOB_ITEMS = [
+  { id: InsuranceProduct.GroupHealth, label: "Group Health" },
+  { id: InsuranceProduct.Sme, label: "SME Insurance" },
   { id: InsuranceProduct.ProfessionalIndemnity, label: "Professional Indemnity" },
   { id: InsuranceProduct.PublicLiability, label: "Public Liability" },
-  { id: InsuranceProduct.Sme, label: "SME Insurance" },
-  { id: InsuranceProduct.Property, label: "Property" },
-  { id: InsuranceProduct.HolidayHomes, label: "Holiday Homes" },
-  { id: InsuranceProduct.WorkmenCompensation, label: "Workmens Compensation" },
+  { id: InsuranceProduct.WorkmenCompensation, label: "Workmen Compensation" },
   { id: InsuranceProduct.ContractorAllRisk, label: "Contractors All Risks" },
+  { id: InsuranceProduct.Property, label: "Property Insurance" },
+  { id: InsuranceProduct.MarineCargo, label: "Marine Cargo" },
 ];
 
 export const Hero: React.FC<HeroProps> = ({ activeTab, onTabChange, onSelectProduct, onSelectPersonalProduct, onViewMoreProducts }) => {
@@ -194,36 +195,34 @@ export const Hero: React.FC<HeroProps> = ({ activeTab, onTabChange, onSelectProd
                   </button>
                 </div>
               ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-3 gap-y-6">
-                  {BUSINESS_LOB_ITEMS.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => onSelectProduct(item.id)}
-                      className="flex flex-col items-center text-center gap-1.5 cursor-pointer group"
-                    >
-                      <img
-                        src={getBusinessIcon(item.id)}
-                        alt={item.label}
-                        className="w-14 h-14 sm:w-16 sm:h-16 object-cover object-top rounded-lg group-hover:scale-110 transition-transform duration-200"
-                        referrerPolicy="no-referrer"
-                      />
-                      <span className="text-[11px] sm:text-xs font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight">
-                        {item.label}
-                        <ChevronRight size={11} className="shrink-0 group-hover:translate-x-0.5 transition-transform" />
-                      </span>
-                    </button>
-                  ))}
+                <div className="flex flex-col items-center gap-8">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-3 gap-y-6 w-full">
+                    {BUSINESS_LOB_ITEMS.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => onSelectProduct(item.id)}
+                        className="flex flex-col items-center text-center gap-1.5 cursor-pointer group"
+                      >
+                        <img
+                          src={getBusinessIcon(item.id)}
+                          alt={item.label}
+                          className="w-14 h-14 sm:w-16 sm:h-16 object-cover object-top rounded-lg group-hover:scale-110 transition-transform duration-200"
+                          referrerPolicy="no-referrer"
+                        />
+                        <span className="text-[11px] sm:text-xs font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight">
+                          {item.label}
+                          <ChevronRight size={11} className="shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+
                   <button
                     onClick={onViewMoreProducts}
-                    className="flex flex-col items-center text-center gap-1.5 cursor-pointer group"
+                    className="inline-flex items-center gap-2 bg-[#fe7434] hover:bg-[#d8632c] text-white font-extrabold text-xs tracking-wider uppercase py-3 px-6 rounded-2xl shadow-lg shadow-orange-500/20 transition-all cursor-pointer"
                   >
-                    <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-lg bg-blue-900 group-hover:bg-blue-800 flex items-center justify-center transition-colors">
-                      <LayoutGrid size={22} className="text-white" />
-                    </div>
-                    <span className="text-[11px] sm:text-xs font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight">
-                      View All
-                      <ChevronRight size={11} className="shrink-0 group-hover:translate-x-0.5 transition-transform" />
-                    </span>
+                    <span>View all business products</span>
+                    <LayoutGrid size={14} />
                   </button>
                 </div>
               )}

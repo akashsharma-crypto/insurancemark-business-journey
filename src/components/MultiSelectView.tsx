@@ -86,7 +86,7 @@ export const MultiSelectView: React.FC<MultiSelectViewProps> = ({
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto bg-[#f8fafc] rounded-3xl overflow-hidden border border-slate-200/80 shadow-2xl flex flex-col min-h-[90vh] animate-in fade-in duration-300">
+    <div className="w-full max-w-7xl mx-auto bg-[#f8fafc] rounded-3xl overflow-hidden border border-slate-200/80 shadow-2xl flex flex-col max-h-[90vh] animate-in fade-in duration-300">
       
       {/* Header Modal Bar */}
       <div className="bg-white border-b border-slate-100 py-5 px-6 sm:px-8 flex items-center justify-between">
