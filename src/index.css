@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800;900&family=Raleway:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+/*
+  Brand tokens pulled from the real insurancemarket.ae site (site scrape CSS):
+  primary blue #1d83bc, dark #155f8a, light #6eaed5, pale bg #dbeef9,
+  CTA orange #fe7434, cream bg #ffecdb. Headings use Prompt, body uses Raleway.
+  We override Tailwind's built-in blue/sky/yellow scales so every existing
+  bg-blue-900 / text-yellow-400 / etc. utility across the app repaints to the
+  real brand palette without touching component markup.
+*/
+@theme {
+  --font-sans: "Raleway", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Prompt", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-blue-50: #edf7fd;
+  --color-blue-100: #dbeef9;
+  --color-blue-200: #b7d9ed;
+  --color-blue-300: #93c4e1;
+  --color-blue-400: #6eaed5;
+  --color-blue-500: #5ea5d0;
+  --color-blue-600: #4e9ccb;
+  --color-blue-700: #3d94c6;
+  --color-blue-800: #2d8bc1;
+  --color-blue-900: #1d83bc;
+  --color-blue-950: #155f8a;
+
+  --color-sky-50: #edf7fd;
+  --color-sky-100: #dbeef9;
+  --color-sky-200: #b7d9ed;
+  --color-sky-300: #93c4e1;
+  --color-sky-400: #6eaed5;
+  --color-sky-500: #5ea5d0;
+  --color-sky-600: #4e9ccb;
+  --color-sky-700: #3d94c6;
+  --color-sky-800: #2d8bc1;
+  --color-sky-900: #1d83bc;
+  --color-sky-950: #155f8a;
+
+  --color-yellow-50: #fff6ed;
+  --color-yellow-100: #ffecdb;
+  --color-yellow-200: #ffc4a3;
+  --color-yellow-300: #fe9c6b;
+  --color-yellow-400: #fe7434;
+  --color-yellow-500: #d8632c;
+  --color-yellow-600: #b85426;
+  --color-yellow-700: #99461f;
+  --color-yellow-800: #7a3819;
+  --color-yellow-900: #5c2a13;
+  --color-yellow-950: #3d1c0c;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #f8fafc;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom styles for high quality aesthetics */
+.custom-glow {
+  box-shadow: 0 0 50px -12px rgba(29, 131, 188, 0.15);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #155f8a 0%, #fe7434 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

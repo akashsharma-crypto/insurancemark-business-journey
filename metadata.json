@@ -1,0 +1,6 @@
+{
+  "name": "Insurance Market UAE Landing Page & Quote Portal",
+  "description": "An interactive insurance landing page for personal and business insurance modeled after insurancemarket.ae, featuring a custom webform with AI-powered Dubai Business Directory lookups.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
