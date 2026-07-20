@@ -132,12 +132,12 @@ export const Hero: React.FC<HeroProps> = ({ onSelectProduct, onSelectPersonalPro
                 <div className="border-t border-slate-200 pt-6 -mt-6">
                   <h2 className="text-center text-base sm:text-lg font-black text-slate-800">Personal Insurance</h2>
                 </div>
-                <div className="grid grid-cols-3 sm:grid-cols-5 gap-x-3 gap-y-6">
+                <div className="flex flex-nowrap justify-between overflow-x-auto gap-x-3 pb-1">
                   {PERSONAL_LOB_ITEMS.map((item) => (
                     <button
                       key={item.label}
                       onClick={() => onSelectPersonalProduct(item.label)}
-                      className="flex flex-col items-center text-center gap-1.5 cursor-pointer group"
+                      className="flex flex-col items-center text-center gap-1.5 cursor-pointer group shrink-0 w-16 sm:w-auto"
                     >
                       {item.icon ? (
                         <img
@@ -165,12 +165,12 @@ export const Hero: React.FC<HeroProps> = ({ onSelectProduct, onSelectPersonalPro
                 <div className="border-t border-slate-200 pt-6">
                   <h2 className="text-center text-base sm:text-lg font-black text-slate-800">Business Insurance</h2>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-3 gap-y-6">
+                <div className="flex flex-nowrap justify-between overflow-x-auto gap-x-3 pb-1">
                   {BUSINESS_LOB_ITEMS.map((item) => (
                     <button
                       key={item.id}
                       onClick={() => onSelectProduct(item.id)}
-                      className="flex flex-col items-center text-center gap-1.5 cursor-pointer group"
+                      className="flex flex-col items-center text-center gap-1.5 cursor-pointer group shrink-0 w-16 sm:w-auto"
                     >
                       <img
                         src={getBusinessIcon(item.id)}
