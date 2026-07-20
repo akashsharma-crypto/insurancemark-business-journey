@@ -65,34 +65,6 @@ export const Hero: React.FC<HeroProps> = ({ onSelectProduct, onSelectPersonalPro
               <ArrowRight size={13} />
             </a>
 
-            {/* Google Rating Banner */}
-            <div className="mt-4 lg:mt-3 w-full max-w-xs flex items-center justify-center gap-2 bg-white border border-slate-100/50 rounded-xl shadow-xs px-4 py-2.5">
-              <img src="/assets/google.svg" alt="Google" className="w-7 h-7 shrink-0" referrerPolicy="no-referrer" />
-              <div className="text-left leading-none">
-                <div className="flex items-center gap-1">
-                  <span className="text-sm font-black text-slate-800">4.8</span>
-                  <span className="flex gap-0.5">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star key={s} size={11} className="fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-500 font-medium mt-0.5">from 30,000+ reviews</p>
-              </div>
-            </div>
-
-            {/* Trust badge chips */}
-            <div className="mt-3 w-full max-w-xs flex items-center gap-2">
-              <div className="flex-1 flex items-center gap-1.5 bg-white border border-slate-100/50 rounded-xl shadow-xs px-2.5 py-2">
-                <Award size={14} className="text-blue-900 shrink-0" />
-                <span className="text-[10px] font-bold text-slate-600 leading-tight">Highest rated insurance platform</span>
-              </div>
-              <div className="flex-1 flex items-center gap-1.5 bg-white border border-slate-100/50 rounded-xl shadow-xs px-2.5 py-2">
-                <Users2 size={14} className="text-blue-900 shrink-0" />
-                <span className="text-[10px] font-bold text-slate-600 leading-tight">Simple and fast claims process</span>
-              </div>
-            </div>
-
           </div>
 
           {/* Right Column: Title + Metro Station illustration + Category grid */}
@@ -122,6 +94,33 @@ export const Hero: React.FC<HeroProps> = ({ onSelectProduct, onSelectPersonalPro
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium text-left">
                 InsuranceMarket.ae is honoured to be recognised with the naming of the <span className="text-blue-900 font-extrabold">InsuranceMarket Metro Station</span>, located between Mall of the Emirates and Dubai Internet City. This milestone firmly places Alfred on the map of Dubai.
               </p>
+            </div>
+
+            {/* Google Rating Banner + Trust badge chips */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="flex items-center justify-center gap-2 bg-white border border-slate-100/50 rounded-xl shadow-xs px-4 py-2.5">
+                <img src="/assets/google.svg" alt="Google" className="w-7 h-7 shrink-0" referrerPolicy="no-referrer" />
+                <div className="text-left leading-none">
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-black text-slate-800">4.8</span>
+                    <span className="flex gap-0.5">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star key={s} size={11} className="fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 font-medium mt-0.5">from 30,000+ reviews</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1.5 bg-white border border-slate-100/50 rounded-xl shadow-xs px-2.5 py-2">
+                <Award size={14} className="text-blue-900 shrink-0" />
+                <span className="text-[10px] font-bold text-slate-600 leading-tight">Highest rated insurance platform</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-white border border-slate-100/50 rounded-xl shadow-xs px-2.5 py-2">
+                <Users2 size={14} className="text-blue-900 shrink-0" />
+                <span className="text-[10px] font-bold text-slate-600 leading-tight">Simple and fast claims process</span>
+              </div>
             </div>
 
           </div>
