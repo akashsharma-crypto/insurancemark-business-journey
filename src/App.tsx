@@ -19,7 +19,6 @@ export default function App() {
   const [currentView, setCurrentView] = useState<ViewType>("home");
   const [selectedProduct, setSelectedProduct] = useState<InsuranceProduct>(InsuranceProduct.WorkmenCompensation);
   const [webformPreselected, setWebformPreselected] = useState<InsuranceProduct[]>([]);
-  const [activeInsuranceTab, setActiveInsuranceTab] = useState<"personal" | "business">("personal");
 
   // Submit cache & lead state
   const [submittedLead, setSubmittedLead] = useState<LeadFormState | null>(null);
@@ -153,14 +152,11 @@ export default function App() {
         {(currentView === "home" || currentView === "multi-select") && (
           <div className="animate-in fade-in duration-200">
             <Hero
-              activeTab={activeInsuranceTab}
-              onTabChange={setActiveInsuranceTab}
               onSelectProduct={handleSelectProduct}
               onSelectPersonalProduct={handleSelectPersonalProduct}
               onViewMoreProducts={handleViewMoreProducts}
             />
             <InsuranceSelector
-              activeTab={activeInsuranceTab}
               onViewMoreProducts={handleViewMoreProducts}
               onSelectPersonalProduct={handleSelectPersonalProduct}
             />

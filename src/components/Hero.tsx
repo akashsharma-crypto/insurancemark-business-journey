@@ -1,11 +1,9 @@
 import React from "react";
-import { Star, ArrowRight, ChevronRight, Award, Users2, User, Landmark, LayoutGrid } from "lucide-react";
+import { Star, ArrowRight, ChevronRight, Award, Users2, LayoutGrid } from "lucide-react";
 import { InsuranceProduct } from "../types";
 import { getBusinessIcon } from "../data/businessIcons";
 
 interface HeroProps {
-  activeTab: "personal" | "business";
-  onTabChange: (tab: "personal" | "business") => void;
   onSelectProduct: (product: InsuranceProduct) => void;
   onSelectPersonalProduct: (productName: string) => void;
   onViewMoreProducts: () => void;
@@ -16,15 +14,12 @@ const PERSONAL_LOB_ITEMS = [
   { label: "Health", icon: "/assets/lob/health.png" },
   { label: "Home", icon: "/assets/lob/home.png" },
   { label: "Life", icon: "/assets/lob/life.png" },
-  { label: "Savings", icon: "/assets/lob/savings.png" },
   { label: "Travel", icon: "/assets/lob/travel.png" },
+  { label: "Savings", icon: "/assets/lob/savings.png" },
   { label: "Pet", icon: "/assets/lob/pet.png" },
   { label: "Bike", icon: "/assets/lob/bike.png" },
   { label: "Yacht", icon: "/assets/lob/yacht.png" },
-  { label: "Smartphone", icon: "/assets/lob/smartphone.png" },
-  { label: "Cyber", icon: "/assets/lob/cyber.png" },
-  { label: "Appliances Warranty", icon: "/assets/lob/business.png" },
-  { label: "Political Violence", icon: "/assets/lob/political-violence.png" },
+  { label: "Job Loss", icon: "/assets/lob-business/professional-indemnity.png" },
 ];
 
 const BUSINESS_LOB_ITEMS = [
@@ -38,7 +33,7 @@ const BUSINESS_LOB_ITEMS = [
   { id: InsuranceProduct.MarineCargo, label: "Marine Cargo" },
 ];
 
-export const Hero: React.FC<HeroProps> = ({ activeTab, onTabChange, onSelectProduct, onSelectPersonalProduct, onViewMoreProducts }) => {
+export const Hero: React.FC<HeroProps> = ({ onSelectProduct, onSelectPersonalProduct, onViewMoreProducts }) => {
   return (
     <section className="relative overflow-hidden bg-[#e0f2fe] text-slate-800 pt-16 pb-12 border-b border-sky-100">
 
@@ -52,7 +47,7 @@ export const Hero: React.FC<HeroProps> = ({ activeTab, onTabChange, onSelectProd
           <div className="lg:col-span-4 flex flex-col items-center text-center lg:sticky lg:top-24">
 
             {/* Mascot Container */}
-            <div className="relative w-full max-w-sm h-72 sm:h-[360px] flex items-center justify-center overflow-visible select-none">
+            <div className="relative w-full max-w-sm h-72 sm:h-[360px] lg:h-60 flex items-center justify-center overflow-visible select-none">
               <img
                 src="/assets/alfred-mascot.png"
                 alt="Alfred Mascot with Floating Coverages"
@@ -69,34 +64,6 @@ export const Hero: React.FC<HeroProps> = ({ activeTab, onTabChange, onSelectProd
               <span>Call 800 Alfred</span>
               <ArrowRight size={13} />
             </a>
-
-            {/* Google Rating Banner */}
-            <div className="mt-4 w-full max-w-xs flex items-center justify-center gap-2 bg-white border border-slate-100/50 rounded-xl shadow-xs px-4 py-2.5">
-              <img src="/assets/google.svg" alt="Google" className="w-7 h-7 shrink-0" referrerPolicy="no-referrer" />
-              <div className="text-left leading-none">
-                <div className="flex items-center gap-1">
-                  <span className="text-sm font-black text-slate-800">4.8</span>
-                  <span className="flex gap-0.5">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star key={s} size={11} className="fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </span>
-                </div>
-                <p className="text-[10px] text-slate-500 font-medium mt-0.5">from 30,000+ reviews</p>
-              </div>
-            </div>
-
-            {/* Trust badge chips */}
-            <div className="mt-3 w-full max-w-xs flex items-center gap-2">
-              <div className="flex-1 flex items-center gap-1.5 bg-white border border-slate-100/50 rounded-xl shadow-xs px-2.5 py-2">
-                <Award size={14} className="text-blue-900 shrink-0" />
-                <span className="text-[10px] font-bold text-slate-600 leading-tight">Highest rated insurance platform</span>
-              </div>
-              <div className="flex-1 flex items-center gap-1.5 bg-white border border-slate-100/50 rounded-xl shadow-xs px-2.5 py-2">
-                <Users2 size={14} className="text-blue-900 shrink-0" />
-                <span className="text-[10px] font-bold text-slate-600 leading-tight">Simple and fast claims process</span>
-              </div>
-            </div>
 
           </div>
 
@@ -129,105 +96,106 @@ export const Hero: React.FC<HeroProps> = ({ activeTab, onTabChange, onSelectProd
               </p>
             </div>
 
-            {/* Personal / Business toggle — kept above the fold, no scroll needed */}
-            <div className="bg-white border border-slate-200/80 rounded-3xl shadow-md p-5 sm:p-6" id="explore-section">
-              <div className="flex justify-center mb-6">
-                <div className="bg-slate-100 p-1.5 rounded-2xl flex items-center shadow-inner gap-1">
-                  <button
-                    onClick={() => onTabChange("personal")}
-                    className={`flex items-center gap-2 px-5 sm:px-7 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
-                      activeTab === "personal"
-                        ? "bg-white text-blue-900 shadow-md"
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    <User size={16} className={activeTab === "personal" ? "text-blue-900" : "text-slate-400"} />
-                    <span>Personal Insurance</span>
-                  </button>
-                  <button
-                    onClick={() => onTabChange("business")}
-                    className={`flex items-center gap-2 px-5 sm:px-7 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
-                      activeTab === "business"
-                        ? "bg-white text-blue-900 shadow-md"
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    <Landmark size={16} className={activeTab === "business" ? "text-blue-900" : "text-slate-400"} />
-                    <span>Business Insurance</span>
-                  </button>
+            {/* Google Rating Banner + Trust badge chips */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="flex items-center justify-center gap-2 bg-white border border-slate-100/50 rounded-xl shadow-xs px-4 py-2.5">
+                <img src="/assets/google.svg" alt="Google" className="w-7 h-7 shrink-0" referrerPolicy="no-referrer" />
+                <div className="text-left leading-none">
+                  <div className="flex items-center gap-1">
+                    <span className="text-sm font-black text-slate-800">4.8</span>
+                    <span className="flex gap-0.5">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Star key={s} size={11} className="fill-yellow-400 text-yellow-400" />
+                      ))}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-slate-500 font-medium mt-0.5">from 30,000+ reviews</p>
                 </div>
               </div>
 
-              {activeTab === "personal" ? (
-                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-x-3 gap-y-6">
-                  {PERSONAL_LOB_ITEMS.map((item) => (
-                    <button
-                      key={item.label}
-                      onClick={() => onSelectPersonalProduct(item.label)}
-                      className="flex flex-col items-center text-center gap-1.5 cursor-pointer group"
-                    >
-                      <img
-                        src={item.icon}
-                        alt={item.label}
-                        className="w-14 h-14 sm:w-16 sm:h-16 object-contain group-hover:scale-110 transition-transform duration-200"
-                        referrerPolicy="no-referrer"
-                      />
-                      <span className="text-[11px] sm:text-xs font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight">
-                        {item.label}
-                        <ChevronRight size={11} className="shrink-0 group-hover:translate-x-0.5 transition-transform" />
-                      </span>
-                    </button>
-                  ))}
-                  <button
-                    onClick={() => onTabChange("business")}
-                    className="flex flex-col items-center text-center gap-1.5 cursor-pointer group"
-                  >
-                    <img
-                      src="/assets/lob/business.png"
-                      alt="Business"
-                      className="w-14 h-14 sm:w-16 sm:h-16 object-contain group-hover:scale-110 transition-transform duration-200"
-                      referrerPolicy="no-referrer"
-                    />
-                    <span className="text-[11px] sm:text-xs font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight">
-                      Business
-                      <ChevronRight size={11} className="shrink-0 group-hover:translate-x-0.5 transition-transform" />
-                    </span>
-                  </button>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-8">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-3 gap-y-6 w-full">
-                    {BUSINESS_LOB_ITEMS.map((item) => (
-                      <button
-                        key={item.id}
-                        onClick={() => onSelectProduct(item.id)}
-                        className="flex flex-col items-center text-center gap-1.5 cursor-pointer group"
-                      >
-                        <img
-                          src={getBusinessIcon(item.id)}
-                          alt={item.label}
-                          className="w-14 h-14 sm:w-16 sm:h-16 object-cover object-top rounded-lg group-hover:scale-110 transition-transform duration-200"
-                          referrerPolicy="no-referrer"
-                        />
-                        <span className="text-[11px] sm:text-xs font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight">
-                          {item.label}
-                          <ChevronRight size={11} className="shrink-0 group-hover:translate-x-0.5 transition-transform" />
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={onViewMoreProducts}
-                    className="inline-flex items-center gap-2 bg-[#fe7434] hover:bg-[#d8632c] text-white font-extrabold text-xs tracking-wider uppercase py-3 px-6 rounded-2xl shadow-lg shadow-orange-500/20 transition-all cursor-pointer"
-                  >
-                    <span>View all business products</span>
-                    <LayoutGrid size={14} />
-                  </button>
-                </div>
-              )}
+              <div className="flex items-center gap-1.5 bg-white border border-slate-100/50 rounded-xl shadow-xs px-2.5 py-2">
+                <Award size={14} className="text-blue-900 shrink-0" />
+                <span className="text-[10px] font-bold text-slate-600 leading-tight">Highest rated insurance platform</span>
+              </div>
+              <div className="flex items-center gap-1.5 bg-white border border-slate-100/50 rounded-xl shadow-xs px-2.5 py-2">
+                <Users2 size={14} className="text-blue-900 shrink-0" />
+                <span className="text-[10px] font-bold text-slate-600 leading-tight">Simple and fast claims process</span>
+              </div>
             </div>
 
+          </div>
+
+        </div>
+
+        {/* Personal & Business Insurance — full width, always visible, no toggle */}
+        <div className="mt-6 lg:mt-8 space-y-8" id="explore-section">
+
+          {/* Personal Insurance section */}
+          <div className="space-y-6">
+            <div className="border-t border-slate-200">
+              <h2 className="text-center text-base sm:text-lg font-black text-slate-800 -mt-3">
+                <span className="bg-[#e0f2fe] px-4">Personal Insurance</span>
+              </h2>
+            </div>
+            <div className="grid grid-cols-5 sm:grid-cols-10 gap-x-2 gap-y-6">
+              {PERSONAL_LOB_ITEMS.map((item) => (
+                <button
+                  key={item.label}
+                  onClick={() => onSelectPersonalProduct(item.label)}
+                  className="flex flex-col items-center text-center gap-1.5 cursor-pointer group min-w-0"
+                >
+                  <img
+                    src={item.icon}
+                    alt={item.label}
+                    className="w-12 h-12 sm:w-14 sm:h-14 object-contain group-hover:scale-110 transition-transform duration-200"
+                    referrerPolicy="no-referrer"
+                  />
+                  <span className="text-[10px] sm:text-xs font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight">
+                    {item.label}
+                    <ChevronRight size={11} className="shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Business Insurance section */}
+          <div className="space-y-6">
+            <div className="border-t border-slate-200">
+              <h2 className="text-center text-base sm:text-lg font-black text-slate-800 -mt-3">
+                <span className="bg-[#e0f2fe] px-4">Business Insurance</span>
+              </h2>
+            </div>
+            <div className="grid grid-cols-4 sm:grid-cols-8 gap-x-2 gap-y-6">
+              {BUSINESS_LOB_ITEMS.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => onSelectProduct(item.id)}
+                  className="flex flex-col items-center text-center gap-1.5 cursor-pointer group min-w-0"
+                >
+                  <img
+                    src={getBusinessIcon(item.id)}
+                    alt={item.label}
+                    className="w-12 h-12 sm:w-14 sm:h-14 object-cover object-top rounded-lg group-hover:scale-110 transition-transform duration-200"
+                    referrerPolicy="no-referrer"
+                  />
+                  <span className="text-[10px] sm:text-xs font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight">
+                    {item.label}
+                    <ChevronRight size={11} className="shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            <div className="flex justify-center">
+              <button
+                onClick={onViewMoreProducts}
+                className="inline-flex items-center gap-2 bg-[#fe7434] hover:bg-[#d8632c] text-white font-extrabold text-xs tracking-wider uppercase py-3 px-6 rounded-2xl shadow-lg shadow-orange-500/20 transition-all cursor-pointer"
+              >
+                <span>View all business products</span>
+                <LayoutGrid size={14} />
+              </button>
+            </div>
           </div>
 
         </div>
