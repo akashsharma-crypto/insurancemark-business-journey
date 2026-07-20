@@ -132,28 +132,28 @@ export const Hero: React.FC<HeroProps> = ({ onSelectProduct, onSelectPersonalPro
                 <div className="border-t border-slate-200 pt-6 -mt-6">
                   <h2 className="text-center text-base sm:text-lg font-black text-slate-800">Personal Insurance</h2>
                 </div>
-                <div className="flex flex-nowrap justify-between overflow-x-auto gap-x-3 pb-1">
+                <div className="grid grid-cols-10 gap-x-1 sm:gap-x-2">
                   {PERSONAL_LOB_ITEMS.map((item) => (
                     <button
                       key={item.label}
                       onClick={() => onSelectPersonalProduct(item.label)}
-                      className="flex flex-col items-center text-center gap-1.5 cursor-pointer group shrink-0 w-16 sm:w-auto"
+                      className="flex flex-col items-center text-center gap-1 cursor-pointer group min-w-0"
                     >
                       {item.icon ? (
                         <img
                           src={item.icon}
                           alt={item.label}
-                          className="w-14 h-14 sm:w-16 sm:h-16 object-contain group-hover:scale-110 transition-transform duration-200"
+                          className="w-8 h-8 sm:w-12 sm:h-12 lg:w-14 lg:h-14 object-contain group-hover:scale-110 transition-transform duration-200"
                           referrerPolicy="no-referrer"
                         />
                       ) : (
-                        <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center">
-                          <Briefcase size={30} className="text-blue-900 group-hover:scale-110 transition-transform duration-200" />
+                        <div className="w-8 h-8 sm:w-12 sm:h-12 lg:w-14 lg:h-14 flex items-center justify-center">
+                          <Briefcase size={20} className="text-blue-900 group-hover:scale-110 transition-transform duration-200" />
                         </div>
                       )}
-                      <span className="text-[11px] sm:text-xs font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight">
+                      <span className="text-[8px] sm:text-[10px] lg:text-[11px] font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight break-words">
                         {item.label}
-                        <ChevronRight size={11} className="shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                        <ChevronRight size={10} className="shrink-0 hidden sm:inline group-hover:translate-x-0.5 transition-transform" />
                       </span>
                     </button>
                   ))}
@@ -165,22 +165,22 @@ export const Hero: React.FC<HeroProps> = ({ onSelectProduct, onSelectPersonalPro
                 <div className="border-t border-slate-200 pt-6">
                   <h2 className="text-center text-base sm:text-lg font-black text-slate-800">Business Insurance</h2>
                 </div>
-                <div className="flex flex-nowrap justify-between overflow-x-auto gap-x-3 pb-1">
+                <div className="grid grid-cols-8 gap-x-1 sm:gap-x-2">
                   {BUSINESS_LOB_ITEMS.map((item) => (
                     <button
                       key={item.id}
                       onClick={() => onSelectProduct(item.id)}
-                      className="flex flex-col items-center text-center gap-1.5 cursor-pointer group shrink-0 w-16 sm:w-auto"
+                      className="flex flex-col items-center text-center gap-1 cursor-pointer group min-w-0"
                     >
                       <img
                         src={getBusinessIcon(item.id)}
                         alt={item.label}
-                        className="w-14 h-14 sm:w-16 sm:h-16 object-cover object-top rounded-lg group-hover:scale-110 transition-transform duration-200"
+                        className="w-8 h-8 sm:w-12 sm:h-12 lg:w-14 lg:h-14 object-cover object-top rounded-lg group-hover:scale-110 transition-transform duration-200"
                         referrerPolicy="no-referrer"
                       />
-                      <span className="text-[11px] sm:text-xs font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight">
+                      <span className="text-[8px] sm:text-[10px] lg:text-[11px] font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight break-words">
                         {item.label}
-                        <ChevronRight size={11} className="shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                        <ChevronRight size={10} className="shrink-0 hidden sm:inline group-hover:translate-x-0.5 transition-transform" />
                       </span>
                     </button>
                   ))}
