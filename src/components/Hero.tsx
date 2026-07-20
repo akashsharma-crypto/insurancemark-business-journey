@@ -1,11 +1,9 @@
 import React from "react";
-import { Star, ArrowRight, ChevronRight, Award, Users2, User, Landmark, LayoutGrid } from "lucide-react";
+import { Star, ArrowRight, ChevronRight, Award, Users2, Briefcase, LayoutGrid } from "lucide-react";
 import { InsuranceProduct } from "../types";
 import { getBusinessIcon } from "../data/businessIcons";
 
 interface HeroProps {
-  activeTab: "personal" | "business";
-  onTabChange: (tab: "personal" | "business") => void;
   onSelectProduct: (product: InsuranceProduct) => void;
   onSelectPersonalProduct: (productName: string) => void;
   onViewMoreProducts: () => void;
@@ -16,15 +14,12 @@ const PERSONAL_LOB_ITEMS = [
   { label: "Health", icon: "/assets/lob/health.png" },
   { label: "Home", icon: "/assets/lob/home.png" },
   { label: "Life", icon: "/assets/lob/life.png" },
-  { label: "Savings", icon: "/assets/lob/savings.png" },
   { label: "Travel", icon: "/assets/lob/travel.png" },
+  { label: "Savings", icon: "/assets/lob/savings.png" },
   { label: "Pet", icon: "/assets/lob/pet.png" },
   { label: "Bike", icon: "/assets/lob/bike.png" },
   { label: "Yacht", icon: "/assets/lob/yacht.png" },
-  { label: "Smartphone", icon: "/assets/lob/smartphone.png" },
-  { label: "Cyber", icon: "/assets/lob/cyber.png" },
-  { label: "Appliances Warranty", icon: "/assets/lob/business.png" },
-  { label: "Political Violence", icon: "/assets/lob/political-violence.png" },
+  { label: "Job Loss", icon: null },
 ];
 
 const BUSINESS_LOB_ITEMS = [
@@ -38,7 +33,7 @@ const BUSINESS_LOB_ITEMS = [
   { id: InsuranceProduct.MarineCargo, label: "Marine Cargo" },
 ];
 
-export const Hero: React.FC<HeroProps> = ({ activeTab, onTabChange, onSelectProduct, onSelectPersonalProduct, onViewMoreProducts }) => {
+export const Hero: React.FC<HeroProps> = ({ onSelectProduct, onSelectPersonalProduct, onViewMoreProducts }) => {
   return (
     <section className="relative overflow-hidden bg-[#e0f2fe] text-slate-800 pt-16 pb-12 border-b border-sky-100">
 
@@ -129,47 +124,58 @@ export const Hero: React.FC<HeroProps> = ({ activeTab, onTabChange, onSelectProd
               </p>
             </div>
 
-            {/* Personal / Business toggle — kept above the fold, no scroll needed */}
-            <div className="bg-white border border-slate-200/80 rounded-3xl shadow-md p-5 sm:p-6" id="explore-section">
-              <div className="flex justify-center mb-6">
-                <div className="bg-slate-100 p-1.5 rounded-2xl flex items-center shadow-inner gap-1">
-                  <button
-                    onClick={() => onTabChange("personal")}
-                    className={`flex items-center gap-2 px-5 sm:px-7 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
-                      activeTab === "personal"
-                        ? "bg-white text-blue-900 shadow-md"
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    <User size={16} className={activeTab === "personal" ? "text-blue-900" : "text-slate-400"} />
-                    <span>Personal Insurance</span>
-                  </button>
-                  <button
-                    onClick={() => onTabChange("business")}
-                    className={`flex items-center gap-2 px-5 sm:px-7 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all duration-200 cursor-pointer ${
-                      activeTab === "business"
-                        ? "bg-white text-blue-900 shadow-md"
-                        : "text-slate-500 hover:text-slate-800"
-                    }`}
-                  >
-                    <Landmark size={16} className={activeTab === "business" ? "text-blue-900" : "text-slate-400"} />
-                    <span>Business Insurance</span>
-                  </button>
-                </div>
-              </div>
+            {/* Personal & Business Insurance — always visible, no toggle */}
+            <div className="bg-white border border-slate-200/80 rounded-3xl shadow-md p-5 sm:p-6 space-y-8" id="explore-section">
 
-              {activeTab === "personal" ? (
-                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-x-3 gap-y-6">
+              {/* Personal Insurance section */}
+              <div className="space-y-6">
+                <div className="border-t border-slate-200 pt-6 -mt-6">
+                  <h2 className="text-center text-base sm:text-lg font-black text-slate-800">Personal Insurance</h2>
+                </div>
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-x-3 gap-y-6">
                   {PERSONAL_LOB_ITEMS.map((item) => (
                     <button
                       key={item.label}
                       onClick={() => onSelectPersonalProduct(item.label)}
                       className="flex flex-col items-center text-center gap-1.5 cursor-pointer group"
                     >
+                      {item.icon ? (
+                        <img
+                          src={item.icon}
+                          alt={item.label}
+                          className="w-14 h-14 sm:w-16 sm:h-16 object-contain group-hover:scale-110 transition-transform duration-200"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <div className="w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center">
+                          <Briefcase size={30} className="text-blue-900 group-hover:scale-110 transition-transform duration-200" />
+                        </div>
+                      )}
+                      <span className="text-[11px] sm:text-xs font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight">
+                        {item.label}
+                        <ChevronRight size={11} className="shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Business Insurance section */}
+              <div className="space-y-6">
+                <div className="border-t border-slate-200 pt-6">
+                  <h2 className="text-center text-base sm:text-lg font-black text-slate-800">Business Insurance</h2>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-3 gap-y-6">
+                  {BUSINESS_LOB_ITEMS.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => onSelectProduct(item.id)}
+                      className="flex flex-col items-center text-center gap-1.5 cursor-pointer group"
+                    >
                       <img
-                        src={item.icon}
+                        src={getBusinessIcon(item.id)}
                         alt={item.label}
-                        className="w-14 h-14 sm:w-16 sm:h-16 object-contain group-hover:scale-110 transition-transform duration-200"
+                        className="w-14 h-14 sm:w-16 sm:h-16 object-cover object-top rounded-lg group-hover:scale-110 transition-transform duration-200"
                         referrerPolicy="no-referrer"
                       />
                       <span className="text-[11px] sm:text-xs font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight">
@@ -178,45 +184,9 @@ export const Hero: React.FC<HeroProps> = ({ activeTab, onTabChange, onSelectProd
                       </span>
                     </button>
                   ))}
-                  <button
-                    onClick={() => onTabChange("business")}
-                    className="flex flex-col items-center text-center gap-1.5 cursor-pointer group"
-                  >
-                    <img
-                      src="/assets/lob/business.png"
-                      alt="Business"
-                      className="w-14 h-14 sm:w-16 sm:h-16 object-contain group-hover:scale-110 transition-transform duration-200"
-                      referrerPolicy="no-referrer"
-                    />
-                    <span className="text-[11px] sm:text-xs font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight">
-                      Business
-                      <ChevronRight size={11} className="shrink-0 group-hover:translate-x-0.5 transition-transform" />
-                    </span>
-                  </button>
                 </div>
-              ) : (
-                <div className="flex flex-col items-center gap-8">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-3 gap-y-6 w-full">
-                    {BUSINESS_LOB_ITEMS.map((item) => (
-                      <button
-                        key={item.id}
-                        onClick={() => onSelectProduct(item.id)}
-                        className="flex flex-col items-center text-center gap-1.5 cursor-pointer group"
-                      >
-                        <img
-                          src={getBusinessIcon(item.id)}
-                          alt={item.label}
-                          className="w-14 h-14 sm:w-16 sm:h-16 object-cover object-top rounded-lg group-hover:scale-110 transition-transform duration-200"
-                          referrerPolicy="no-referrer"
-                        />
-                        <span className="text-[11px] sm:text-xs font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight">
-                          {item.label}
-                          <ChevronRight size={11} className="shrink-0 group-hover:translate-x-0.5 transition-transform" />
-                        </span>
-                      </button>
-                    ))}
-                  </div>
 
+                <div className="flex justify-center">
                   <button
                     onClick={onViewMoreProducts}
                     className="inline-flex items-center gap-2 bg-[#fe7434] hover:bg-[#d8632c] text-white font-extrabold text-xs tracking-wider uppercase py-3 px-6 rounded-2xl shadow-lg shadow-orange-500/20 transition-all cursor-pointer"
@@ -225,7 +195,8 @@ export const Hero: React.FC<HeroProps> = ({ activeTab, onTabChange, onSelectProd
                     <LayoutGrid size={14} />
                   </button>
                 </div>
-              )}
+              </div>
+
             </div>
 
           </div>
