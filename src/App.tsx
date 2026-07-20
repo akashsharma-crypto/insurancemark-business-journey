@@ -22,6 +22,7 @@ export default function App() {
 
   // Submit cache & lead state
   const [submittedLead, setSubmittedLead] = useState<LeadFormState | null>(null);
+  const [opportunityId, setOpportunityId] = useState<string | null>(null);
   const [quoteResult, setQuoteResult] = useState<{
     refId: string;
     lead: LeadFormState;
@@ -63,17 +64,45 @@ export default function App() {
   };
 
   // Step 1 Completed (Lead Form submitted successfully)
-  const handleLeadFormSuccess = (refId: string, lead: LeadFormState) => {
+  const handleLeadFormSuccess = async (refId: string, lead: LeadFormState) => {
     setSubmittedLead(lead);
+    setOpportunityId(null);
     // Route to Step 2: Proceed selection (Image 3)
     setCurrentView("proceed");
     window.scrollTo({ top: 0, behavior: "smooth" });
+
+    // Create/attach the Opportunity + Leads in IMCRM (best-effort; the journey
+    // continues even if the CRM is unreachable, falling back to a local id later)
+    try {
+      const response = await fetch("/api/create-lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          companyName: lead.companyName,
+          companyLandline: lead.companyLandline,
+          tradeLicense: lead.tradeLicense,
+          contactName: lead.contactName,
+          contactEmail: lead.contactEmail,
+          contactMobile: lead.contactMobile,
+          selectedProducts: lead.selectedProducts,
+          emirate: lead.emirate,
+          businessActivity: lead.businessActivity,
+          businessDescription: lead.businessDescription,
+        }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setOpportunityId(data.opportunityId);
+      }
+    } catch (error) {
+      console.error("Failed to create CRM opportunity:", error);
+    }
   };
 
   // Step 2 Completed via fast path (advisor booking or files uploader)
   const handleProceedCompleteFlow = (meetingDetails?: string, uploadedFiles?: string[]) => {
     if (!submittedLead) return;
-    const refId = `OP-${Math.floor(100000 + Math.random() * 899999)}`;
+    const refId = opportunityId ?? `OP-${Math.floor(100000 + Math.random() * 899999)}`;
     setQuoteResult({
       refId,
       lead: submittedLead
@@ -92,7 +121,7 @@ export default function App() {
   // Step 3 Completed (digital form submitted)
   const handleApplicationComplete = (formType: string, submittedData: any) => {
     if (!submittedLead) return;
-    const refId = `OP-${Math.floor(100000 + Math.random() * 899999)}`;
+    const refId = opportunityId ?? `OP-${Math.floor(100000 + Math.random() * 899999)}`;
     setQuoteResult({
       refId,
       lead: submittedLead
