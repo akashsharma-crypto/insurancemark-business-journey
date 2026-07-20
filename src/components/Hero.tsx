@@ -47,7 +47,7 @@ export const Hero: React.FC<HeroProps> = ({ onSelectProduct, onSelectPersonalPro
           <div className="lg:col-span-4 flex flex-col items-center text-center lg:sticky lg:top-24">
 
             {/* Mascot Container */}
-            <div className="relative w-full max-w-sm h-72 sm:h-[360px] flex items-center justify-center overflow-visible select-none">
+            <div className="relative w-full max-w-sm h-72 sm:h-[360px] lg:h-60 flex items-center justify-center overflow-visible select-none">
               <img
                 src="/assets/alfred-mascot.png"
                 alt="Alfred Mascot with Floating Coverages"
@@ -66,7 +66,7 @@ export const Hero: React.FC<HeroProps> = ({ onSelectProduct, onSelectPersonalPro
             </a>
 
             {/* Google Rating Banner */}
-            <div className="mt-4 w-full max-w-xs flex items-center justify-center gap-2 bg-white border border-slate-100/50 rounded-xl shadow-xs px-4 py-2.5">
+            <div className="mt-4 lg:mt-3 w-full max-w-xs flex items-center justify-center gap-2 bg-white border border-slate-100/50 rounded-xl shadow-xs px-4 py-2.5">
               <img src="/assets/google.svg" alt="Google" className="w-7 h-7 shrink-0" referrerPolicy="no-referrer" />
               <div className="text-left leading-none">
                 <div className="flex items-center gap-1">
@@ -129,7 +129,7 @@ export const Hero: React.FC<HeroProps> = ({ onSelectProduct, onSelectPersonalPro
         </div>
 
         {/* Personal & Business Insurance — full width, always visible, no toggle */}
-        <div className="mt-12 space-y-8" id="explore-section">
+        <div className="mt-6 lg:mt-8 space-y-8" id="explore-section">
 
           {/* Personal Insurance section */}
           <div className="space-y-6">
