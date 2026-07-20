@@ -121,7 +121,7 @@ export default function App() {
       {/* Main viewport */}
       <main className="flex-1">
         
-        {currentView === "home" && (
+        {(currentView === "home" || currentView === "multi-select") && (
           <div className="animate-in fade-in duration-200">
             <Hero
               activeTab={activeInsuranceTab}
@@ -151,8 +151,11 @@ export default function App() {
         )}
 
         {currentView === "multi-select" && (
-          <div className="animate-in fade-in duration-200">
-            <MultiSelectView 
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+            onClick={(e) => { if (e.target === e.currentTarget) handleGoHome(); }}
+          >
+            <MultiSelectView
               onBack={handleGoHome}
               onContinue={handleContinueMulti}
               initialSelected={webformPreselected}
