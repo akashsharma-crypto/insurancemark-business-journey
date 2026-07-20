@@ -1,5 +1,5 @@
 import React from "react";
-import { Star, ArrowRight, ChevronRight, Award, Users2, Briefcase, LayoutGrid } from "lucide-react";
+import { Star, ArrowRight, ChevronRight, Award, Users2, LayoutGrid } from "lucide-react";
 import { InsuranceProduct } from "../types";
 import { getBusinessIcon } from "../data/businessIcons";
 
@@ -19,7 +19,7 @@ const PERSONAL_LOB_ITEMS = [
   { label: "Pet", icon: "/assets/lob/pet.png" },
   { label: "Bike", icon: "/assets/lob/bike.png" },
   { label: "Yacht", icon: "/assets/lob/yacht.png" },
-  { label: "Job Loss", icon: null },
+  { label: "Job Loss", icon: "/assets/lob-business/professional-indemnity.png" },
 ];
 
 const BUSINESS_LOB_ITEMS = [
@@ -139,18 +139,12 @@ export const Hero: React.FC<HeroProps> = ({ onSelectProduct, onSelectPersonalPro
                       onClick={() => onSelectPersonalProduct(item.label)}
                       className="flex flex-col items-center text-center gap-1 cursor-pointer group min-w-0"
                     >
-                      {item.icon ? (
-                        <img
-                          src={item.icon}
-                          alt={item.label}
-                          className="w-8 h-8 sm:w-12 sm:h-12 lg:w-14 lg:h-14 object-contain group-hover:scale-110 transition-transform duration-200"
-                          referrerPolicy="no-referrer"
-                        />
-                      ) : (
-                        <div className="w-8 h-8 sm:w-12 sm:h-12 lg:w-14 lg:h-14 flex items-center justify-center">
-                          <Briefcase size={20} className="text-blue-900 group-hover:scale-110 transition-transform duration-200" />
-                        </div>
-                      )}
+                      <img
+                        src={item.icon}
+                        alt={item.label}
+                        className="w-8 h-8 sm:w-12 sm:h-12 lg:w-14 lg:h-14 object-contain group-hover:scale-110 transition-transform duration-200"
+                        referrerPolicy="no-referrer"
+                      />
                       <span className="text-[8px] sm:text-[10px] lg:text-[11px] font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight break-words">
                         {item.label}
                         <ChevronRight size={10} className="shrink-0 hidden sm:inline group-hover:translate-x-0.5 transition-transform" />
