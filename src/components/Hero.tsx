@@ -124,75 +124,79 @@ export const Hero: React.FC<HeroProps> = ({ onSelectProduct, onSelectPersonalPro
               </p>
             </div>
 
-            {/* Personal & Business Insurance — always visible, no toggle */}
-            <div className="bg-white border border-slate-200/80 rounded-3xl shadow-md p-5 sm:p-6 space-y-8" id="explore-section">
+          </div>
 
-              {/* Personal Insurance section */}
-              <div className="space-y-6">
-                <div className="border-t border-slate-200 pt-6 -mt-6">
-                  <h2 className="text-center text-base sm:text-lg font-black text-slate-800">Personal Insurance</h2>
-                </div>
-                <div className="grid grid-cols-10 gap-x-1 sm:gap-x-2">
-                  {PERSONAL_LOB_ITEMS.map((item) => (
-                    <button
-                      key={item.label}
-                      onClick={() => onSelectPersonalProduct(item.label)}
-                      className="flex flex-col items-center text-center gap-1 cursor-pointer group min-w-0"
-                    >
-                      <img
-                        src={item.icon}
-                        alt={item.label}
-                        className="w-8 h-8 sm:w-12 sm:h-12 lg:w-14 lg:h-14 object-contain group-hover:scale-110 transition-transform duration-200"
-                        referrerPolicy="no-referrer"
-                      />
-                      <span className="text-[8px] sm:text-[10px] lg:text-[11px] font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight break-words">
-                        {item.label}
-                        <ChevronRight size={10} className="shrink-0 hidden sm:inline group-hover:translate-x-0.5 transition-transform" />
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
+        </div>
 
-              {/* Business Insurance section */}
-              <div className="space-y-6">
-                <div className="border-t border-slate-200 pt-6">
-                  <h2 className="text-center text-base sm:text-lg font-black text-slate-800">Business Insurance</h2>
-                </div>
-                <div className="grid grid-cols-8 gap-x-1 sm:gap-x-2">
-                  {BUSINESS_LOB_ITEMS.map((item) => (
-                    <button
-                      key={item.id}
-                      onClick={() => onSelectProduct(item.id)}
-                      className="flex flex-col items-center text-center gap-1 cursor-pointer group min-w-0"
-                    >
-                      <img
-                        src={getBusinessIcon(item.id)}
-                        alt={item.label}
-                        className="w-8 h-8 sm:w-12 sm:h-12 lg:w-14 lg:h-14 object-cover object-top rounded-lg group-hover:scale-110 transition-transform duration-200"
-                        referrerPolicy="no-referrer"
-                      />
-                      <span className="text-[8px] sm:text-[10px] lg:text-[11px] font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight break-words">
-                        {item.label}
-                        <ChevronRight size={10} className="shrink-0 hidden sm:inline group-hover:translate-x-0.5 transition-transform" />
-                      </span>
-                    </button>
-                  ))}
-                </div>
+        {/* Personal & Business Insurance — full width, always visible, no toggle */}
+        <div className="mt-12 space-y-8" id="explore-section">
 
-                <div className="flex justify-center">
-                  <button
-                    onClick={onViewMoreProducts}
-                    className="inline-flex items-center gap-2 bg-[#fe7434] hover:bg-[#d8632c] text-white font-extrabold text-xs tracking-wider uppercase py-3 px-6 rounded-2xl shadow-lg shadow-orange-500/20 transition-all cursor-pointer"
-                  >
-                    <span>View all business products</span>
-                    <LayoutGrid size={14} />
-                  </button>
-                </div>
-              </div>
+          {/* Personal Insurance section */}
+          <div className="space-y-6">
+            <div className="border-t border-slate-200">
+              <h2 className="text-center text-base sm:text-lg font-black text-slate-800 -mt-3">
+                <span className="bg-[#e0f2fe] px-4">Personal Insurance</span>
+              </h2>
+            </div>
+            <div className="grid grid-cols-5 sm:grid-cols-10 gap-x-2 gap-y-6">
+              {PERSONAL_LOB_ITEMS.map((item) => (
+                <button
+                  key={item.label}
+                  onClick={() => onSelectPersonalProduct(item.label)}
+                  className="flex flex-col items-center text-center gap-1.5 cursor-pointer group min-w-0"
+                >
+                  <img
+                    src={item.icon}
+                    alt={item.label}
+                    className="w-12 h-12 sm:w-14 sm:h-14 object-contain group-hover:scale-110 transition-transform duration-200"
+                    referrerPolicy="no-referrer"
+                  />
+                  <span className="text-[10px] sm:text-xs font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight">
+                    {item.label}
+                    <ChevronRight size={11} className="shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
 
+          {/* Business Insurance section */}
+          <div className="space-y-6">
+            <div className="border-t border-slate-200">
+              <h2 className="text-center text-base sm:text-lg font-black text-slate-800 -mt-3">
+                <span className="bg-[#e0f2fe] px-4">Business Insurance</span>
+              </h2>
+            </div>
+            <div className="grid grid-cols-4 sm:grid-cols-8 gap-x-2 gap-y-6">
+              {BUSINESS_LOB_ITEMS.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => onSelectProduct(item.id)}
+                  className="flex flex-col items-center text-center gap-1.5 cursor-pointer group min-w-0"
+                >
+                  <img
+                    src={getBusinessIcon(item.id)}
+                    alt={item.label}
+                    className="w-12 h-12 sm:w-14 sm:h-14 object-cover object-top rounded-lg group-hover:scale-110 transition-transform duration-200"
+                    referrerPolicy="no-referrer"
+                  />
+                  <span className="text-[10px] sm:text-xs font-bold text-blue-900 flex items-center justify-center gap-0.5 leading-tight">
+                    {item.label}
+                    <ChevronRight size={11} className="shrink-0 group-hover:translate-x-0.5 transition-transform" />
+                  </span>
+                </button>
+              ))}
             </div>
 
+            <div className="flex justify-center">
+              <button
+                onClick={onViewMoreProducts}
+                className="inline-flex items-center gap-2 bg-[#fe7434] hover:bg-[#d8632c] text-white font-extrabold text-xs tracking-wider uppercase py-3 px-6 rounded-2xl shadow-lg shadow-orange-500/20 transition-all cursor-pointer"
+              >
+                <span>View all business products</span>
+                <LayoutGrid size={14} />
+              </button>
+            </div>
           </div>
 
         </div>
