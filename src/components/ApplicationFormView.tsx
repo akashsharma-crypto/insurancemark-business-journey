@@ -54,8 +54,15 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
   onBack,
   onCompleteFlow
 }) => {
+  // Public Liability is the only product selected: skip the multi-product tab
+  // selector entirely and go straight into the dedicated PL form.
+  const isPlOnlyDirect = (() => {
+    const prods = lead.selectedProducts || [];
+    return prods.length === 1 && (prods[0] === InsuranceProduct.PublicLiability || prods[0] === InsuranceProduct.PublicLiabilitySelect);
+  })();
+
   // Determine default form type based on selected products
-  const [selectedFormType, setSelectedFormType] = useState<"SME" | "PL" | "DO" | "Offline">("SME");
+  const [selectedFormType, setSelectedFormType] = useState<"SME" | "PL" | "DO" | "Offline">(isPlOnlyDirect ? "PL" : "SME");
   const [activeTab, setActiveTab] = useState<number>(1);
 
   // SME Form is always displayed as the primary underwriting form on the screen.
@@ -476,7 +483,7 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
           className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 text-xs font-bold transition-colors cursor-pointer group"
         >
           <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
-          <span>Change submission method</span>
+          <span>{isPlOnlyDirect ? "Back to Business Details" : "Change submission method"}</span>
         </button>
 
         {/* Dynamic Header */}
@@ -493,30 +500,32 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
         </div>
 
         {/* Form Selector Tabs (Makes all forms available online) */}
-        <div className="bg-slate-200/60 p-1.5 rounded-2xl max-w-3xl mx-auto flex flex-wrap gap-1 border border-slate-200">
-          {[
-            { id: "SME", label: "SME Package Form" },
-            { id: "PL", label: "Public Liability Form" },
-            { id: "DO", label: "D&O Liability Form" },
-            { id: "Offline", label: "Manual Document Upload" }
-          ].map((formOpt) => (
-            <button
-              key={formOpt.id}
-              type="button"
-              onClick={() => {
-                setSelectedFormType(formOpt.id as any);
-                setActiveTab(1);
-              }}
-              className={`flex-1 min-w-[130px] py-2.5 px-3 text-xs font-extrabold rounded-xl text-center transition-all cursor-pointer ${
-                selectedFormType === formOpt.id
-                  ? "bg-blue-900 text-white shadow-md shadow-blue-900/10"
-                  : "text-slate-600 hover:bg-slate-300/30 hover:text-slate-900"
-              }`}
-            >
-              {formOpt.label}
-            </button>
-          ))}
-        </div>
+        {!isPlOnlyDirect && (
+          <div className="bg-slate-200/60 p-1.5 rounded-2xl max-w-3xl mx-auto flex flex-wrap gap-1 border border-slate-200">
+            {[
+              { id: "SME", label: "SME Package Form" },
+              { id: "PL", label: "Public Liability Form" },
+              { id: "DO", label: "D&O Liability Form" },
+              { id: "Offline", label: "Manual Document Upload" }
+            ].map((formOpt) => (
+              <button
+                key={formOpt.id}
+                type="button"
+                onClick={() => {
+                  setSelectedFormType(formOpt.id as any);
+                  setActiveTab(1);
+                }}
+                className={`flex-1 min-w-[130px] py-2.5 px-3 text-xs font-extrabold rounded-xl text-center transition-all cursor-pointer ${
+                  selectedFormType === formOpt.id
+                    ? "bg-blue-900 text-white shadow-md shadow-blue-900/10"
+                    : "text-slate-600 hover:bg-slate-300/30 hover:text-slate-900"
+                }`}
+              >
+                {formOpt.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Main Interactive Form Card */}
         <div className="max-w-5xl mx-auto bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden">

@@ -15,6 +15,13 @@ import { ThankYouView } from "./components/ThankYouView";
 
 type ViewType = "home" | "product" | "multi-select" | "webform" | "proceed" | "application" | "success";
 
+// Public Liability gets a direct, dedicated online form (no offline PDF hub, no
+// multi-product tab selector) when it's the only product on the lead.
+const isPublicLiabilityOnly = (products: InsuranceProduct[] | undefined) => {
+  const list = products || [];
+  return list.length === 1 && (list[0] === InsuranceProduct.PublicLiability || list[0] === InsuranceProduct.PublicLiabilitySelect);
+};
+
 export default function App() {
   const [currentView, setCurrentView] = useState<ViewType>("home");
   const [selectedProduct, setSelectedProduct] = useState<InsuranceProduct>(InsuranceProduct.WorkmenCompensation);
@@ -67,8 +74,9 @@ export default function App() {
   const handleLeadFormSuccess = async (refId: string, lead: LeadFormState) => {
     setSubmittedLead(lead);
     setOpportunityId(null);
-    // Route to Step 2: Proceed selection (Image 3)
-    setCurrentView("proceed");
+    // Public Liability-only leads skip Step 2 (Coverage Details) and go straight
+    // into the dedicated 5-step Public Liability form.
+    setCurrentView(isPublicLiabilityOnly(lead.selectedProducts) ? "application" : "proceed");
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     // Create/attach the Opportunity + Leads in IMCRM (best-effort; the journey
@@ -214,9 +222,9 @@ export default function App() {
         {/* Step 3: Application Forms */}
         {currentView === "application" && submittedLead && (
           <div className="animate-in fade-in duration-200">
-            <ApplicationFormView 
+            <ApplicationFormView
               lead={submittedLead}
-              onBack={() => setCurrentView("proceed")}
+              onBack={() => setCurrentView(isPublicLiabilityOnly(submittedLead.selectedProducts) ? "webform" : "proceed")}
               onCompleteFlow={handleApplicationComplete}
             />
           </div>
