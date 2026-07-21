@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { InsuranceProduct, LeadFormState } from "../types";
-import { 
-  ArrowLeft, CheckCircle, FileText, ChevronRight, Check, Sparkles, Building2, 
+import {
+  ArrowLeft, CheckCircle, FileText, ChevronRight, Check, Sparkles, Building2,
   MapPin, AlertCircle, FileDown, UploadCloud, Loader2, DollarSign, Users, Award,
-  Shield, Landmark, HelpCircle, Map, Trash2, Calendar
+  Shield, Landmark, HelpCircle, Map, Trash2, Calendar, Plus, Image as ImageIcon
 } from "lucide-react";
 
 interface ApplicationFormViewProps {
@@ -11,6 +11,43 @@ interface ApplicationFormViewProps {
   onBack: () => void;
   onCompleteFlow: (formType: string, submittedData: any) => void;
 }
+
+// Public Liability: occupancy classifications and geographical cover options
+const PL_OCCUPANCY_OPTIONS = [
+  "Office - Building Location",
+  "Office - Warehouse Location",
+  "Clinics",
+  "Restaurant - Alcohol, Shisha, BBQ",
+  "Retail Shop (Excludes Jewelry)",
+  "Salon/Barbershop",
+  "Warehouse - Direct Referral",
+  "Educational Centers",
+  "Kiosk (Indoor)",
+  "Kiosk (Outdoor)",
+  "Others"
+];
+
+const PL_GEOGRAPHICAL_LIMITS = ["UAE", "GCC", "Worldwide excl. US and Canada", "Worldwide inc. US & Canada"];
+
+interface PLLocation {
+  id: string;
+  address: string;
+  limitOfIndemnity: string;
+  occupancy: string;
+  occupancyOtherDetails: string;
+  claimsHistoryLast5Years: "yes" | "no";
+  claimsDetails: string;
+}
+
+const createEmptyPLLocation = (id: string): PLLocation => ({
+  id,
+  address: "",
+  limitOfIndemnity: "",
+  occupancy: "Office - Building Location",
+  occupancyOtherDetails: "",
+  claimsHistoryLast5Years: "no",
+  claimsDetails: ""
+});
 
 export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
   lead,
@@ -213,75 +250,115 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
   };
 
   // Form State 2: Standalone Public Liability Form
+  // 5-step flow: Company Details -> Risk Locations -> Off-site & Extensions -> Uploads -> Review & Sign
   const [plForm, setPlForm] = useState(() => {
     return {
       companyName: lead.companyName || "",
-      officeAddress: vc?.address || "",
-      operationsDescription: lead.businessDescription || lead.businessActivity || (vc?.activities && vc.activities.join(", ")) || "",
-      otherLocations: "",
+      tradeLicenseNumber: lead.tradeLicense || "",
+      businessDescription: lead.businessDescription || lead.businessActivity || (vc?.activities && vc.activities.join(", ")) || "",
+      contactPerson: lead.contactName || "",
+      contactEmail: lead.contactEmail || "",
+      contactPhone: lead.contactMobile || "",
 
-      // Section 2 Employees (Wages and count)
-      employeesPremisesPast12Count: "",
-      employeesPremisesPast12Wages: "",
-      employeesPremisesNext12Count: "",
-      employeesPremisesNext12Wages: "",
-      employeesAwayPast12Count: "",
-      employeesAwayPast12Wages: "",
-      employeesAwayNext12Count: "",
-      employeesAwayNext12Wages: "",
+      numberOfLocations: 1,
+      locations: [{ ...createEmptyPLLocation("1"), address: vc?.address || "" }] as PLLocation[],
 
-      // Section 3 Subcontractors
-      employSubcontractors: "",
-      subcontractedWorksNature: "",
-      requireSubcontractorPL: "",
-      subcontractorsPremisesPast12Paid: "",
-      subcontractorsPremisesNext12Paid: "",
-      subcontractorsAwayPast12Paid: "",
-      subcontractorsAwayNext12Paid: "",
+      offsiteCoverRequired: "no" as "yes" | "no",
+      offsiteLocation: "",
+      offsiteLimitOfIndemnity: "",
+      offsiteGeographicalLimit: "UAE",
+      offsiteManualWorkEmployees: "no" as "yes" | "no",
+      offsiteAnnualTurnover: "",
+      offsiteTurnoverSplitDetails: "",
+      offsiteEstimatedProjects: "",
+      offsiteNumberOfEmployees: "",
+      offsiteSubcontractedWork: "no" as "yes" | "no",
+      offsiteSubcontractedServices: "",
+      offsiteSubcontractedPercentage: "",
 
-      // Section 4 Financials (Turnovers)
-      turnoverUAENextEstimate: "",
-      turnoverUAECurrentProjected: "",
-      turnoverUAEPreviousYear: "",
-      turnoverGCCNextEstimate: "",
-      turnoverGCCCurrentProjected: "",
-      turnoverGCCPreviousYear: "",
-      turnoverUSNextEstimate: "",
-      turnoverUSCurrentProjected: "",
-      turnoverUSPreviousYear: "",
-      turnoverWorldNextEstimate: "",
-      turnoverWorldCurrentProjected: "",
-      turnoverWorldPreviousYear: "",
+      extPropertyBeingWorkedUpon: false,
+      extPropertyUnderCareCustodyControl: false,
+      extPrincipalsExistingProperty: false,
 
-      estimatedProjectsPerYear: "",
-      estimatedMaxProjectPeriod: "",
-      maxContractValueOfAnyOneProject: "",
+      tradeLicenseFile: "",
+      sitePhotos: [] as string[],
 
-      // Section 5 Insurance Requirements
-      limitOfIndemnity: "1 million", // match PDF default
-      deductible: "",
-      geographicalLimitRequired: "",
-      insuranceDeclinedOrCancelled: "NIL", // match PDF default
-
-      coverPrincipalPropertiesRequired: "",
-      coverPropertyBeingWorkedUponRequired: "",
-      coverParticipantStudentLiabilityRequired: "",
-      coverFoodAndDrinksRequired: "",
-
-      // Current PL details if any
-      currentInsurerName: "",
-      currentLimitOfIndemnity: "",
-      currentDeductible: "",
-      currentPolicyPeriod: "",
-      currentPremium: "",
-
-      // Section 6 Claims
-      claimsPast5YearsDetails: "",
-      awareOfIncidentsDetails: "",
+      signatureName: lead.contactName || "",
+      signatureDate: new Date().toISOString().split("T")[0],
 
       agreedToDeclaration: false
     };
   });
+
+  const handlePlLocationCountChange = (newNum: number) => {
+    let updated = [...plForm.locations];
+    if (newNum > updated.length) {
+      for (let i = updated.length; i < newNum; i++) updated.push(createEmptyPLLocation((i + 1).toString()));
+    } else if (newNum < updated.length) {
+      updated = updated.slice(0, newNum);
+    }
+    setPlForm({ ...plForm, numberOfLocations: newNum, locations: updated });
+  };
+
+  const handlePlLocationChange = (index: number, key: keyof PLLocation, value: any) => {
+    const updated = plForm.locations.map((loc, idx) => (idx === index ? { ...loc, [key]: value } : loc));
+    setPlForm({ ...plForm, locations: updated });
+  };
+
+  const handlePlSimUpload = (type: "license" | "photo") => {
+    if (type === "license") {
+      setPlForm({ ...plForm, tradeLicenseFile: "Trade_License_Scan.pdf" });
+    } else {
+      setPlForm({ ...plForm, sitePhotos: [...plForm.sitePhotos, `Site_Photo_${plForm.sitePhotos.length + 1}.jpg`] });
+    }
+  };
+
+  // Field-level validation mirroring the reference Public Liability flow's dynamic
+  // required/optional rules (fields only become required once a prior answer triggers them).
+  const plErrors = React.useMemo(() => {
+    const errs: Record<string, string> = {};
+
+    if (!plForm.companyName.trim()) errs.companyName = "Company Name is required.";
+    if (!plForm.tradeLicenseNumber.trim()) errs.tradeLicenseNumber = "Trade License Number is required.";
+    if (!plForm.contactPerson.trim()) errs.contactPerson = "Primary Contact Person is required.";
+    if (!plForm.contactEmail.trim()) {
+      errs.contactEmail = "Contact Email is required.";
+    } else if (!/\S+@\S+\.\S+/.test(plForm.contactEmail)) {
+      errs.contactEmail = "Contact Email format is invalid.";
+    }
+    if (!plForm.contactPhone.trim()) errs.contactPhone = "Contact Phone is required.";
+    if (!plForm.businessDescription.trim()) errs.businessDescription = "Business Description is required.";
+
+    plForm.locations.forEach((loc, idx) => {
+      if (!loc.address.trim()) errs[`location_${idx}_address`] = `Address is required for Location #${idx + 1}.`;
+      if (!loc.limitOfIndemnity.trim()) errs[`location_${idx}_limitOfIndemnity`] = `Limit of Indemnity is required for Location #${idx + 1}.`;
+      if (loc.occupancy === "Others" && !loc.occupancyOtherDetails.trim()) {
+        errs[`location_${idx}_occupancyOtherDetails`] = `Please specify 'Others' occupancy details for Location #${idx + 1}.`;
+      }
+      if (loc.claimsHistoryLast5Years === "yes" && !loc.claimsDetails.trim()) {
+        errs[`location_${idx}_claimsDetails`] = `Claims details must be specified for Location #${idx + 1} since Claims History is 'Yes'.`;
+      }
+    });
+
+    if (plForm.offsiteCoverRequired === "yes") {
+      if (!plForm.offsiteLocation.trim()) errs.offsiteLocation = "Off-site Location description is required.";
+      if (!plForm.offsiteLimitOfIndemnity.trim()) errs.offsiteLimitOfIndemnity = "Overall Off-site Limit of Indemnity is required.";
+      if (!plForm.offsiteAnnualTurnover.trim()) errs.offsiteAnnualTurnover = "Annual Turnover is required for off-site cover.";
+      if (plForm.offsiteGeographicalLimit !== "UAE" && !plForm.offsiteTurnoverSplitDetails.trim()) {
+        errs.offsiteTurnoverSplitDetails = "Turnover country split is required for international geographical coverage.";
+      }
+      if (!plForm.offsiteEstimatedProjects || parseInt(plForm.offsiteEstimatedProjects, 10) < 0) {
+        errs.offsiteEstimatedProjects = "Estimated projects count is required (minimum 0).";
+      }
+      if (!plForm.offsiteNumberOfEmployees || parseInt(plForm.offsiteNumberOfEmployees, 10) < 1) {
+        errs.offsiteNumberOfEmployees = "Number of employees is required (minimum 1).";
+      }
+    }
+
+    if (!plForm.tradeLicenseFile) errs.tradeLicenseFile = "Uploading a Trade License copy is mandatory to complete the proposal.";
+
+    return errs;
+  }, [plForm]);
 
   // Form State 3: Directors & Officers (D&O) Liability Form
   const [doForm, setDoForm] = useState(() => {
@@ -1190,12 +1267,14 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
           {/* ======================= FORM 2: PUBLIC LIABILITY PROPOSAL FORM ======================= */}
           {selectedFormType === "PL" && (
             <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-8">
-              {/* Tabs Inside Public Liability Form */}
+              {/* 5-Step Progress Tabs */}
               <div className="flex border-b border-slate-100 overflow-x-auto gap-4 scrollbar-none pb-0.5">
                 {[
-                  { id: 1, label: "1. Company & Employees" },
-                  { id: 2, label: "2. Subcontractors & Financials" },
-                  { id: 3, label: "3. Cover & History" }
+                  { id: 1, label: "1. Company Details" },
+                  { id: 2, label: "2. Risk Locations" },
+                  { id: 3, label: "3. Off-site & Extensions" },
+                  { id: 4, label: "4. Uploads" },
+                  { id: 5, label: "5. Review & Sign" }
                 ].map((t) => (
                   <button
                     key={t.id}
@@ -1212,322 +1291,689 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                 ))}
               </div>
 
-              {/* PL Tab 1: Company & Employees */}
+              {/* STEP 1: Company Details */}
               {activeTab === 1 && (
                 <div className="space-y-6 animate-in fade-in duration-150">
-                  <h3 className="text-xs font-black text-blue-950 uppercase tracking-widest border-b pb-1">SECTION 1. COMPANY DETAILS</h3>
+                  <h3 className="text-xs font-black text-blue-950 uppercase tracking-widest border-b pb-1">Company Profile</h3>
+                  <p className="text-[11px] text-slate-500 -mt-3">
+                    Provide your official registered corporate details to begin your Public Liability Insurance application.
+                  </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center">
-                        <label className="text-xs font-extrabold text-slate-700">Company Name</label>
+                        <label className="text-xs font-extrabold text-slate-700">Registered Company Name</label>
                         {isFieldAutoFilled("companyName") && <AutoFillBadge />}
                       </div>
-                      <input 
-                        type="text" 
-                        value={plForm.companyName} 
+                      <input
+                        type="text"
+                        value={plForm.companyName}
                         onChange={(e) => setPlForm({ ...plForm, companyName: e.target.value })}
-                        placeholder="Legal company name"
+                        placeholder="e.g. Acme Gulf Trading LLC"
                         className={`w-full py-3 px-4 rounded-xl text-xs font-bold outline-none transition-all ${
                           isFieldAutoFilled("companyName")
                             ? "bg-green-50/20 border-2 border-green-300 text-slate-800"
+                            : plErrors.companyName
+                            ? "bg-white border-2 border-rose-300 text-slate-800 focus:border-rose-500"
                             : "bg-white border border-slate-200 text-slate-800 focus:border-blue-950"
                         }`}
                       />
+                      {plErrors.companyName && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.companyName}</p>}
                     </div>
 
                     <div className="space-y-1.5">
-                      <div className="flex justify-between items-center">
-                        <label className="text-xs font-extrabold text-slate-700">Office and Mailing Address</label>
-                        {isFieldAutoFilled("officeAddress") && <AutoFillBadge />}
-                      </div>
-                      <input 
-                        type="text" 
-                        value={plForm.officeAddress} 
-                        onChange={(e) => setPlForm({ ...plForm, officeAddress: e.target.value })}
-                        placeholder="Full premises address"
-                        className={`w-full py-3 px-4 rounded-xl text-xs font-bold outline-none transition-all ${
-                          isFieldAutoFilled("officeAddress")
-                            ? "bg-green-50/20 border-2 border-green-300 text-slate-800"
-                            : "bg-white border border-slate-200 text-slate-800 focus:border-blue-950"
+                      <label className="text-xs font-extrabold text-slate-700">Trade License Number</label>
+                      <input
+                        type="text"
+                        value={plForm.tradeLicenseNumber}
+                        onChange={(e) => setPlForm({ ...plForm, tradeLicenseNumber: e.target.value })}
+                        placeholder="e.g. TL-123456-D"
+                        className={`w-full py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                          plErrors.tradeLicenseNumber ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
                         }`}
                       />
+                      {plErrors.tradeLicenseNumber && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.tradeLicenseNumber}</p>}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-extrabold text-slate-700">Primary Contact Person</label>
+                      <input
+                        type="text"
+                        value={plForm.contactPerson}
+                        onChange={(e) => setPlForm({ ...plForm, contactPerson: e.target.value })}
+                        placeholder="e.g. Sarah Connor"
+                        className={`w-full py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                          plErrors.contactPerson ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                        }`}
+                      />
+                      {plErrors.contactPerson && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.contactPerson}</p>}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-extrabold text-slate-700">Contact Email Address</label>
+                      <input
+                        type="email"
+                        value={plForm.contactEmail}
+                        onChange={(e) => setPlForm({ ...plForm, contactEmail: e.target.value })}
+                        placeholder="e.g. contact@acmegulf.ae"
+                        className={`w-full py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                          plErrors.contactEmail ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                        }`}
+                      />
+                      {plErrors.contactEmail && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.contactEmail}</p>}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-extrabold text-slate-700">Contact Phone Number</label>
+                      <input
+                        type="tel"
+                        value={plForm.contactPhone}
+                        onChange={(e) => setPlForm({ ...plForm, contactPhone: e.target.value })}
+                        placeholder="e.g. +971 50 123 4567"
+                        className={`w-full py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                          plErrors.contactPhone ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                        }`}
+                      />
+                      {plErrors.contactPhone && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.contactPhone}</p>}
                     </div>
 
                     <div className="space-y-1.5 sm:col-span-2">
                       <div className="flex justify-between items-center">
-                        <label className="text-xs font-extrabold text-slate-700">Brief Description of the Operations</label>
+                        <label className="text-xs font-extrabold text-slate-700">Brief Business Operations Description</label>
                         {isFieldAutoFilled("operationsDescription") && <AutoFillBadge />}
                       </div>
-                      <textarea 
+                      <textarea
                         rows={3}
-                        value={plForm.operationsDescription} 
-                        onChange={(e) => setPlForm({ ...plForm, operationsDescription: e.target.value })}
-                        placeholder="Detailed operations or commercial business activities"
+                        value={plForm.businessDescription}
+                        onChange={(e) => setPlForm({ ...plForm, businessDescription: e.target.value })}
+                        placeholder="Describe your core commercial activities, services, products sold, and general operations"
                         className={`w-full py-3 px-4 rounded-xl text-xs font-bold outline-none transition-all ${
                           isFieldAutoFilled("operationsDescription")
                             ? "bg-green-50/20 border-2 border-green-300 text-slate-800"
+                            : plErrors.businessDescription
+                            ? "bg-white border-2 border-rose-300 text-slate-800 focus:border-rose-500"
                             : "bg-white border border-slate-200 text-slate-800 focus:border-blue-950"
                         }`}
                       />
-                    </div>
-
-                    <div className="space-y-1.5 sm:col-span-2">
-                      <label className="text-xs font-extrabold text-slate-700">Other locations wherein the business operates aside from office</label>
-                      <input 
-                        type="text" 
-                        value={plForm.otherLocations} 
-                        onChange={(e) => setPlForm({ ...plForm, otherLocations: e.target.value })}
-                        placeholder="If none, leave blank"
-                        className="w-full bg-white border border-slate-200 py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950" 
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-4 pt-4">
-                    <h3 className="text-xs font-black text-blue-950 uppercase tracking-widest border-b pb-1">SECTION 2. EMPLOYEES</h3>
-                    <p className="text-[11px] text-slate-500 leading-relaxed">
-                      State the number of employees and the amount of their wages, salaries, etc. during the past twelve months, and give estimated figures for the next twelve months.
-                    </p>
-
-                    <div className="border border-slate-200 rounded-2xl overflow-hidden overflow-x-auto">
-                      <table className="w-full text-left text-xs border-collapse">
-                        <thead>
-                          <tr className="bg-slate-50 border-b border-slate-200 font-extrabold text-slate-600">
-                            <th className="p-3">Staff Location</th>
-                            <th className="p-3">No. of Employees (Past 12m)</th>
-                            <th className="p-3">No. of Employees (Next 12m)</th>
-                            <th className="p-3">Wages/Earnings (Past 12m)</th>
-                            <th className="p-3">Wages/Earnings (Next 12m)</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr className="border-b border-slate-100 font-semibold text-slate-800">
-                            <td className="p-3 text-slate-500">At your premises</td>
-                            <td className="p-3">
-                              <input type="number" value={plForm.employeesPremisesPast12Count} onChange={(e) => setPlForm({ ...plForm, employeesPremisesPast12Count: e.target.value })} className="bg-white border border-slate-200 p-1.5 rounded w-24" />
-                            </td>
-                            <td className="p-3">
-                              <input type="number" value={plForm.employeesPremisesNext12Count} onChange={(e) => setPlForm({ ...plForm, employeesPremisesNext12Count: e.target.value })} className="bg-white border border-slate-200 p-1.5 rounded w-24" />
-                            </td>
-                            <td className="p-3">
-                              <input type="text" value={plForm.employeesPremisesPast12Wages} onChange={(e) => setPlForm({ ...plForm, employeesPremisesPast12Wages: e.target.value })} className="bg-white border border-slate-200 p-1.5 rounded w-36" placeholder="AED" />
-                            </td>
-                            <td className="p-3">
-                              <input type="text" value={plForm.employeesPremisesNext12Wages} onChange={(e) => setPlForm({ ...plForm, employeesPremisesNext12Wages: e.target.value })} className="bg-white border border-slate-200 p-1.5 rounded w-36" placeholder="AED" />
-                            </td>
-                          </tr>
-                          <tr className="font-semibold text-slate-800">
-                            <td className="p-3 text-slate-500">Away from your premises</td>
-                            <td className="p-3">
-                              <input type="number" value={plForm.employeesAwayPast12Count} onChange={(e) => setPlForm({ ...plForm, employeesAwayPast12Count: e.target.value })} className="bg-white border border-slate-200 p-1.5 rounded w-24" />
-                            </td>
-                            <td className="p-3">
-                              <input type="number" value={plForm.employeesAwayNext12Count} onChange={(e) => setPlForm({ ...plForm, employeesAwayNext12Count: e.target.value })} className="bg-white border border-slate-200 p-1.5 rounded w-24" />
-                            </td>
-                            <td className="p-3">
-                              <input type="text" value={plForm.employeesAwayPast12Wages} onChange={(e) => setPlForm({ ...plForm, employeesAwayPast12Wages: e.target.value })} className="bg-white border border-slate-200 p-1.5 rounded w-36" placeholder="AED" />
-                            </td>
-                            <td className="p-3">
-                              <input type="text" value={plForm.employeesAwayNext12Wages} onChange={(e) => setPlForm({ ...plForm, employeesAwayNext12Wages: e.target.value })} className="bg-white border border-slate-200 p-1.5 rounded w-36" placeholder="AED" />
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
+                      {plErrors.businessDescription && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.businessDescription}</p>}
+                      <p className="text-[10px] text-slate-400">This information assists underwriter verification of classification codes and risks.</p>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* PL Tab 2: Subcontractors & Financials */}
+              {/* STEP 2: Risk Locations */}
               {activeTab === 2 && (
+                <div className="space-y-6 animate-in fade-in duration-150">
+                  <h3 className="text-xs font-black text-blue-950 uppercase tracking-widest border-b pb-1">Location Risk Assessment</h3>
+                  <p className="text-[11px] text-slate-500 -mt-3">
+                    Specify risk details and limits required for each business location to be covered under the Public Liability policy.
+                  </p>
+
+                  <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="space-y-0.5">
+                      <label className="text-xs font-black text-slate-800">Number of Locations to Cover</label>
+                      <p className="text-[11px] text-slate-500">Select how many physical corporate addresses require direct coverage.</p>
+                    </div>
+                    <select
+                      value={plForm.numberOfLocations}
+                      onChange={(e) => handlePlLocationCountChange(parseInt(e.target.value, 10))}
+                      className="bg-white border border-slate-200 text-slate-800 px-4 py-2 rounded-xl text-xs font-bold outline-none focus:border-blue-950 cursor-pointer w-full sm:w-48"
+                    >
+                      {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                        <option key={n} value={n}>{n} {n === 1 ? "Location" : "Locations"}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="space-y-6">
+                    {plForm.locations.map((loc, idx) => (
+                      <div key={loc.id} className="border border-slate-200 rounded-2xl overflow-hidden bg-white">
+                        <div className="bg-slate-50 px-5 py-3 border-b border-slate-200 flex justify-between items-center">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                            <span className="w-5 h-5 flex items-center justify-center rounded-full bg-slate-200 text-slate-700 text-[10px] font-black">{idx + 1}</span>
+                            Location Details
+                          </span>
+                          {plForm.numberOfLocations > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handlePlLocationCountChange(plForm.numberOfLocations - 1)}
+                              className="text-slate-400 hover:text-rose-500 flex items-center gap-1 text-[11px] font-bold cursor-pointer"
+                            >
+                              <Trash2 size={13} />
+                              <span>Delete</span>
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+                          <div className="md:col-span-2 space-y-1.5">
+                            <label className="text-[11px] font-extrabold text-slate-700">Full Physical Address</label>
+                            <input
+                              type="text"
+                              value={loc.address}
+                              onChange={(e) => handlePlLocationChange(idx, "address", e.target.value)}
+                              placeholder="e.g. Unit 401, Level 4, Business Tower, Downtown, Dubai, UAE"
+                              className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                plErrors[`location_${idx}_address`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                              }`}
+                            />
+                            {plErrors[`location_${idx}_address`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors[`location_${idx}_address`]}</p>}
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <label className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1.5">
+                              <DollarSign size={13} className="text-slate-400" /> Limit of Indemnity Required (AED)
+                            </label>
+                            <input
+                              type="text"
+                              value={loc.limitOfIndemnity}
+                              onChange={(e) => {
+                                const clean = e.target.value.replace(/[^0-9]/g, "");
+                                const formatted = clean ? Number(clean).toLocaleString("en-US") : "";
+                                handlePlLocationChange(idx, "limitOfIndemnity", formatted);
+                              }}
+                              placeholder="e.g. 5,000,000"
+                              className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                plErrors[`location_${idx}_limitOfIndemnity`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                              }`}
+                            />
+                            {plErrors[`location_${idx}_limitOfIndemnity`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors[`location_${idx}_limitOfIndemnity`]}</p>}
+                            <p className="text-[10px] text-slate-400">Typical limits: 1,000,000 to 10,000,000 AED per location</p>
+                          </div>
+
+                          <div className="space-y-1.5">
+                            <label className="text-[11px] font-extrabold text-slate-700">Location Occupancy Type</label>
+                            <select
+                              value={loc.occupancy}
+                              onChange={(e) => handlePlLocationChange(idx, "occupancy", e.target.value)}
+                              className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950 cursor-pointer"
+                            >
+                              {PL_OCCUPANCY_OPTIONS.map((opt) => (
+                                <option key={opt} value={opt}>{opt}</option>
+                              ))}
+                            </select>
+
+                            {loc.occupancy === "Warehouse - Direct Referral" && (
+                              <div className="flex gap-2 p-2 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-[10px] mt-2 leading-relaxed">
+                                <AlertCircle size={14} className="text-amber-600 shrink-0" />
+                                <span><strong>Direct Referral Required:</strong> Warehouses have unique liability scopes. Our underwriters will contact you for a direct physical inspection.</span>
+                              </div>
+                            )}
+                            {loc.occupancy === "Retail Shop (Excludes Jewelry)" && (
+                              <div className="p-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-600 text-[10px] mt-2">
+                                <strong>Note:</strong> Coverage explicitly excludes operations involving precious metal jewelry, watches, gems or coins.
+                              </div>
+                            )}
+                            {loc.occupancy === "Restaurant - Alcohol, Shisha, BBQ" && (
+                              <div className="p-2 bg-blue-50 border border-blue-100 rounded-lg text-blue-900 text-[10px] mt-2">
+                                <strong>Note:</strong> Premium considers liability risks associated with alcohol, open BBQ fires, and waterpipe (shisha) smoking.
+                              </div>
+                            )}
+                          </div>
+
+                          {loc.occupancy === "Others" && (
+                            <div className="md:col-span-2 space-y-1.5">
+                              <label className="text-[11px] font-extrabold text-slate-700">Specify 'Others' Occupancy Details</label>
+                              <input
+                                type="text"
+                                value={loc.occupancyOtherDetails}
+                                onChange={(e) => handlePlLocationChange(idx, "occupancyOtherDetails", e.target.value)}
+                                placeholder="e.g. Art Gallery, Private Gym, Photography Studio"
+                                className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                  plErrors[`location_${idx}_occupancyOtherDetails`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                                }`}
+                              />
+                              {plErrors[`location_${idx}_occupancyOtherDetails`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors[`location_${idx}_occupancyOtherDetails`]}</p>}
+                            </div>
+                          )}
+
+                          <div className="md:col-span-2 bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col gap-4">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                              <div className="space-y-0.5">
+                                <span className="text-[11px] font-extrabold text-slate-700">Claims History (Last 5 Years)</span>
+                                <p className="text-[10px] text-slate-500">Has this location experienced any liability claims or incidents in the last 5 years?</p>
+                              </div>
+                              <div className="flex gap-4">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <input type="radio" name={`pl-claims-${idx}`} checked={loc.claimsHistoryLast5Years === "no"} onChange={() => handlePlLocationChange(idx, "claimsHistoryLast5Years", "no")} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
+                                  <span className="text-xs font-bold text-slate-700">No</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <input type="radio" name={`pl-claims-${idx}`} checked={loc.claimsHistoryLast5Years === "yes"} onChange={() => handlePlLocationChange(idx, "claimsHistoryLast5Years", "yes")} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
+                                  <span className="text-xs font-bold text-slate-700">Yes</span>
+                                </label>
+                              </div>
+                            </div>
+
+                            {loc.claimsHistoryLast5Years === "yes" && (
+                              <div className="space-y-1.5 border-t border-slate-200/60 pt-3">
+                                <label className="text-[10px] font-extrabold text-slate-600">Provide claims details (dates, nature, resolution status, paid/outstanding amounts)</label>
+                                <textarea
+                                  rows={2}
+                                  value={loc.claimsDetails}
+                                  onChange={(e) => handlePlLocationChange(idx, "claimsDetails", e.target.value)}
+                                  placeholder="e.g. Jan 2024: Customer slip and fall settled for AED 15,000. Safety grip mats installed immediately after."
+                                  className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                    plErrors[`location_${idx}_claimsDetails`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                                  }`}
+                                />
+                                {plErrors[`location_${idx}_claimsDetails`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors[`location_${idx}_claimsDetails`]}</p>}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {plForm.numberOfLocations < 10 && (
+                    <div className="flex justify-center pt-2">
+                      <button
+                        type="button"
+                        onClick={() => handlePlLocationCountChange(plForm.numberOfLocations + 1)}
+                        className="flex items-center gap-2 text-xs text-blue-900 font-black px-4 py-2 border border-dashed border-blue-200 rounded-xl hover:border-blue-900 hover:bg-blue-50/40 transition-all cursor-pointer"
+                      >
+                        <Plus size={15} />
+                        Add Another Business Location
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* STEP 3: Off-site Operations & Liability Extensions */}
+              {activeTab === 3 && (
                 <div className="space-y-8 animate-in fade-in duration-150">
-                  {/* Subcontractors */}
                   <div className="space-y-4">
-                    <h3 className="text-xs font-black text-blue-950 uppercase tracking-widest border-b pb-1">SECTION 3. SUBCONTRACTORS</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700">Do you employ Sub-Contractors?</label>
-                        <select 
-                          value={plForm.employSubcontractors} 
-                          onChange={(e) => setPlForm({ ...plForm, employSubcontractors: e.target.value })}
-                          className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800"
-                        >
-                          <option value="">-- Select --</option>
-                          <option value="No">No</option>
-                          <option value="Yes">Yes</option>
-                        </select>
-                      </div>
+                    <h3 className="text-xs font-black text-blue-950 uppercase tracking-widest border-b pb-1">Off-Site Operations</h3>
+                    <p className="text-[11px] text-slate-500">
+                      Indicate if you perform third-party site projects, installations, deliveries, or contract work outside your registered premises.
+                    </p>
 
-                      <div className="space-y-1.5 sm:col-span-2">
-                        <label className="text-xs font-bold text-slate-700">Nature of the Sub-contracted Works</label>
-                        <input type="text" value={plForm.subcontractedWorksNature} onChange={(e) => setPlForm({ ...plForm, subcontractedWorksNature: e.target.value })} className="w-full bg-white border border-slate-200 py-2.5 px-4 rounded-xl text-xs font-bold" placeholder="Describe subbed works" />
+                    <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                      <div className="space-y-0.5">
+                        <label className="text-xs font-black text-slate-800">Do you have operations outside the registered address you want to cover?</label>
+                        <p className="text-[11px] text-slate-500">Includes off-site service calls, client office visits, installations, and subcontracted projects.</p>
                       </div>
-
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-bold text-slate-700">Require subcontractors to have PL?</label>
-                        <select 
-                          value={plForm.requireSubcontractorPL} 
-                          onChange={(e) => setPlForm({ ...plForm, requireSubcontractorPL: e.target.value })}
-                          className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800"
-                        >
-                          <option value="">-- Select --</option>
-                          <option value="No">No</option>
-                          <option value="Yes">Yes</option>
-                        </select>
+                      <div className="flex gap-4 shrink-0">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input type="radio" name="pl-offsite" checked={plForm.offsiteCoverRequired === "no"} onChange={() => setPlForm({ ...plForm, offsiteCoverRequired: "no" })} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
+                          <span className="text-xs font-bold text-slate-700">No</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input type="radio" name="pl-offsite" checked={plForm.offsiteCoverRequired === "yes"} onChange={() => setPlForm({ ...plForm, offsiteCoverRequired: "yes" })} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
+                          <span className="text-xs font-bold text-slate-700">Yes</span>
+                        </label>
                       </div>
                     </div>
 
-                    {plForm.employSubcontractors === "Yes" && (
-                      <div className="space-y-2 animate-in slide-in-from-top-2 pt-2">
-                        <p className="text-[10px] font-black text-slate-500 uppercase tracking-wider">Payments made to Subcontractors (AED)</p>
-                        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-                          <input type="text" placeholder="At premises (Past 12m)" value={plForm.subcontractorsPremisesPast12Paid} onChange={(e) => setPlForm({ ...plForm, subcontractorsPremisesPast12Paid: e.target.value })} className="bg-white border border-slate-200 p-2 rounded-xl text-xs font-semibold" />
-                          <input type="text" placeholder="At premises (Next 12m)" value={plForm.subcontractorsPremisesNext12Paid} onChange={(e) => setPlForm({ ...plForm, subcontractorsPremisesNext12Paid: e.target.value })} className="bg-white border border-slate-200 p-2 rounded-xl text-xs font-semibold" />
-                          <input type="text" placeholder="Away premises (Past 12m)" value={plForm.subcontractorsAwayPast12Paid} onChange={(e) => setPlForm({ ...plForm, subcontractorsAwayPast12Paid: e.target.value })} className="bg-white border border-slate-200 p-2 rounded-xl text-xs font-semibold" />
-                          <input type="text" placeholder="Away premises (Next 12m)" value={plForm.subcontractorsAwayNext12Paid} onChange={(e) => setPlForm({ ...plForm, subcontractorsAwayNext12Paid: e.target.value })} className="bg-white border border-slate-200 p-2 rounded-xl text-xs font-semibold" />
+                    {plForm.offsiteCoverRequired === "yes" && (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 bg-slate-50/40 p-5 rounded-2xl border border-slate-100">
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-extrabold text-slate-700">Off-site Operations Locations</label>
+                          <input
+                            type="text"
+                            value={plForm.offsiteLocation}
+                            onChange={(e) => setPlForm({ ...plForm, offsiteLocation: e.target.value })}
+                            placeholder="e.g. Client sites across UAE, or dynamic projects"
+                            className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                              plErrors.offsiteLocation ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                            }`}
+                          />
+                          {plErrors.offsiteLocation && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.offsiteLocation}</p>}
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-extrabold text-slate-700">Overall Limit of Indemnity Required (AED)</label>
+                          <input
+                            type="text"
+                            value={plForm.offsiteLimitOfIndemnity}
+                            onChange={(e) => {
+                              const clean = e.target.value.replace(/[^0-9]/g, "");
+                              setPlForm({ ...plForm, offsiteLimitOfIndemnity: clean ? Number(clean).toLocaleString("en-US") : "" });
+                            }}
+                            placeholder="e.g. 10,000,000"
+                            className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                              plErrors.offsiteLimitOfIndemnity ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                            }`}
+                          />
+                          {plErrors.offsiteLimitOfIndemnity && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.offsiteLimitOfIndemnity}</p>}
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1"><Map size={13} className="text-slate-400" /> Geographical Limit Required</label>
+                          <select value={plForm.offsiteGeographicalLimit} onChange={(e) => setPlForm({ ...plForm, offsiteGeographicalLimit: e.target.value })} className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950 cursor-pointer">
+                            {PL_GEOGRAPHICAL_LIMITS.map((limit) => (
+                              <option key={limit} value={limit}>{limit}</option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-extrabold text-slate-700">Employees Doing Manual Work?</label>
+                          <div className="flex gap-4 py-1">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input type="radio" name="pl-manual" checked={plForm.offsiteManualWorkEmployees === "no"} onChange={() => setPlForm({ ...plForm, offsiteManualWorkEmployees: "no" })} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
+                              <span className="text-xs font-bold text-slate-700">No</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input type="radio" name="pl-manual" checked={plForm.offsiteManualWorkEmployees === "yes"} onChange={() => setPlForm({ ...plForm, offsiteManualWorkEmployees: "yes" })} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
+                              <span className="text-xs font-bold text-slate-700">Yes</span>
+                            </label>
+                          </div>
+                          {plForm.offsiteManualWorkEmployees === "yes" && (
+                            <p className="text-[10px] text-blue-900 font-bold">Note: Premium will adjust for manual risk exposures such as heights, tools, or machinery.</p>
+                          )}
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-extrabold text-slate-700">Annual Turnover (AED)</label>
+                          <input
+                            type="text"
+                            value={plForm.offsiteAnnualTurnover}
+                            onChange={(e) => {
+                              const clean = e.target.value.replace(/[^0-9]/g, "");
+                              setPlForm({ ...plForm, offsiteAnnualTurnover: clean ? Number(clean).toLocaleString("en-US") : "" });
+                            }}
+                            placeholder="Estimated yearly sales / revenue"
+                            className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                              plErrors.offsiteAnnualTurnover ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                            }`}
+                          />
+                          {plErrors.offsiteAnnualTurnover && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.offsiteAnnualTurnover}</p>}
+                        </div>
+
+                        {plForm.offsiteGeographicalLimit !== "UAE" && (
+                          <div className="space-y-1.5 md:col-span-2">
+                            <label className="text-[11px] font-extrabold text-slate-700">Annual Turnover Split per Country</label>
+                            <textarea
+                              rows={2}
+                              value={plForm.offsiteTurnoverSplitDetails}
+                              onChange={(e) => setPlForm({ ...plForm, offsiteTurnoverSplitDetails: e.target.value })}
+                              placeholder="e.g. UAE: AED 3,000,000 | Saudi Arabia: AED 1,500,000 | Oman: AED 500,000"
+                              className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                plErrors.offsiteTurnoverSplitDetails ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                              }`}
+                            />
+                            {plErrors.offsiteTurnoverSplitDetails && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.offsiteTurnoverSplitDetails}</p>}
+                          </div>
+                        )}
+
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-extrabold text-slate-700">Estimated Number of Projects / Contracts</label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={plForm.offsiteEstimatedProjects}
+                            onChange={(e) => setPlForm({ ...plForm, offsiteEstimatedProjects: e.target.value })}
+                            placeholder="e.g. 15"
+                            className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                              plErrors.offsiteEstimatedProjects ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                            }`}
+                          />
+                          {plErrors.offsiteEstimatedProjects && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.offsiteEstimatedProjects}</p>}
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1"><Users size={13} className="text-slate-400" /> Total Number of Employees</label>
+                          <input
+                            type="number"
+                            min="1"
+                            value={plForm.offsiteNumberOfEmployees}
+                            onChange={(e) => setPlForm({ ...plForm, offsiteNumberOfEmployees: e.target.value })}
+                            placeholder="e.g. 45"
+                            className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                              plErrors.offsiteNumberOfEmployees ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                            }`}
+                          />
+                          {plErrors.offsiteNumberOfEmployees && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.offsiteNumberOfEmployees}</p>}
+                        </div>
+
+                        <div className="md:col-span-2 border-t border-slate-200/60 pt-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div className="space-y-0.5">
+                              <label className="text-[11px] font-extrabold text-slate-700">Is any of your off-site work subcontracted?</label>
+                              <p className="text-[10px] text-slate-500">Select yes if you assign works to independent third-party vendors or freelancers.</p>
+                            </div>
+                            <div className="flex gap-4 shrink-0">
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="pl-subcontracted" checked={plForm.offsiteSubcontractedWork === "no"} onChange={() => setPlForm({ ...plForm, offsiteSubcontractedWork: "no" })} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
+                                <span className="text-xs font-bold text-slate-700">No</span>
+                              </label>
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="pl-subcontracted" checked={plForm.offsiteSubcontractedWork === "yes"} onChange={() => setPlForm({ ...plForm, offsiteSubcontractedWork: "yes" })} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
+                                <span className="text-xs font-bold text-slate-700">Yes</span>
+                              </label>
+                            </div>
+                          </div>
+
+                          {plForm.offsiteSubcontractedWork === "yes" && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 bg-white p-4 rounded-xl border border-slate-100">
+                              <div className="space-y-1.5">
+                                <label className="text-[10px] font-extrabold text-slate-600">Subcontracted Services (Optional)</label>
+                                <input type="text" value={plForm.offsiteSubcontractedServices} onChange={(e) => setPlForm({ ...plForm, offsiteSubcontractedServices: e.target.value })} placeholder="e.g. Electrical wiring, plumbing, HVAC install" className="w-full bg-slate-50/40 border border-slate-200 py-2 px-3 rounded-lg text-xs font-bold text-slate-800 outline-none focus:border-blue-950" />
+                              </div>
+                              <div className="space-y-1.5">
+                                <label className="text-[10px] font-extrabold text-slate-600">% of Subcontracted Work on Turnover (Optional)</label>
+                                <input type="number" min="0" max="100" value={plForm.offsiteSubcontractedPercentage} onChange={(e) => setPlForm({ ...plForm, offsiteSubcontractedPercentage: e.target.value })} placeholder="e.g. 15" className="w-full bg-slate-50/40 border border-slate-200 py-2 px-3 rounded-lg text-xs font-bold text-slate-800 outline-none focus:border-blue-950" />
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
                   </div>
 
-                  {/* Financials Turnover matrix */}
-                  <div className="space-y-4">
-                    <h3 className="text-xs font-black text-blue-950 uppercase tracking-widest border-b pb-1">SECTION 4. FINANCIALS (ANNUAL TURNOVER IN AED)</h3>
-                    <div className="border border-slate-200 rounded-2xl overflow-hidden overflow-x-auto">
-                      <table className="w-full text-left text-xs border-collapse">
-                        <thead>
-                          <tr className="bg-slate-50 border-b border-slate-200 font-extrabold text-slate-600">
-                            <th className="p-3">Financial Period</th>
-                            <th className="p-3">UAE (AED)</th>
-                            <th className="p-3">GCC (AED)</th>
-                            <th className="p-3">US & Canada (AED)</th>
-                            <th className="p-3">Rest of the World (AED)</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr className="border-b border-slate-100 font-semibold text-slate-800">
-                            <td className="p-3 text-slate-500">Next Financial Year (Estimate)</td>
-                            <td className="p-3"><input type="text" value={plForm.turnoverUAENextEstimate} onChange={(e) => setPlForm({ ...plForm, turnoverUAENextEstimate: e.target.value })} className="border p-1 w-28" /></td>
-                            <td className="p-3"><input type="text" value={plForm.turnoverGCCNextEstimate} onChange={(e) => setPlForm({ ...plForm, turnoverGCCNextEstimate: e.target.value })} className="border p-1 w-28" /></td>
-                            <td className="p-3"><input type="text" value={plForm.turnoverUSNextEstimate} onChange={(e) => setPlForm({ ...plForm, turnoverUSNextEstimate: e.target.value })} className="border p-1 w-28" /></td>
-                            <td className="p-3"><input type="text" value={plForm.turnoverWorldNextEstimate} onChange={(e) => setPlForm({ ...plForm, turnoverWorldNextEstimate: e.target.value })} className="border p-1 w-28" /></td>
-                          </tr>
-                          <tr className="border-b border-slate-100 font-semibold text-slate-800">
-                            <td className="p-3 text-slate-500">Current Financial Year (Projected)</td>
-                            <td className="p-3"><input type="text" value={plForm.turnoverUAECurrentProjected} onChange={(e) => setPlForm({ ...plForm, turnoverUAECurrentProjected: e.target.value })} className="border p-1 w-28" /></td>
-                            <td className="p-3"><input type="text" value={plForm.turnoverGCCCurrentProjected} onChange={(e) => setPlForm({ ...plForm, turnoverGCCCurrentProjected: e.target.value })} className="border p-1 w-28" /></td>
-                            <td className="p-3"><input type="text" value={plForm.turnoverUSCurrentProjected} onChange={(e) => setPlForm({ ...plForm, turnoverUSCurrentProjected: e.target.value })} className="border p-1 w-28" /></td>
-                            <td className="p-3"><input type="text" value={plForm.turnoverWorldCurrentProjected} onChange={(e) => setPlForm({ ...plForm, turnoverWorldCurrentProjected: e.target.value })} className="border p-1 w-28" /></td>
-                          </tr>
-                          <tr className="font-semibold text-slate-800">
-                            <td className="p-3 text-slate-500">Previous Financial Year</td>
-                            <td className="p-3"><input type="text" value={plForm.turnoverUAEPreviousYear} onChange={(e) => setPlForm({ ...plForm, turnoverUAEPreviousYear: e.target.value })} className="border p-1 w-28" /></td>
-                            <td className="p-3"><input type="text" value={plForm.turnoverGCCPreviousYear} onChange={(e) => setPlForm({ ...plForm, turnoverGCCPreviousYear: e.target.value })} className="border p-1 w-28" /></td>
-                            <td className="p-3"><input type="text" value={plForm.turnoverUSPreviousYear} onChange={(e) => setPlForm({ ...plForm, turnoverUSPreviousYear: e.target.value })} className="border p-1 w-28" /></td>
-                            <td className="p-3"><input type="text" value={plForm.turnoverWorldPreviousYear} onChange={(e) => setPlForm({ ...plForm, turnoverWorldPreviousYear: e.target.value })} className="border p-1 w-28" /></td>
-                          </tr>
-                        </tbody>
-                      </table>
+                  <div className="space-y-4 pt-4 border-t border-slate-100">
+                    <div>
+                      <h3 className="text-xs font-black text-blue-950 uppercase tracking-widest">Liability Extensions Required</h3>
+                      <p className="text-[11px] text-slate-500 mt-0.5">Select additional coverage extensions for specialized assets or principal protection.</p>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
-                      <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-slate-600">Estimated number of projects in a year</label>
-                        <input type="number" value={plForm.estimatedProjectsPerYear} onChange={(e) => setPlForm({ ...plForm, estimatedProjectsPerYear: e.target.value })} className="w-full border p-2.5 rounded-xl text-xs" />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-slate-600">Estimated maximum period for any one project</label>
-                        <input type="text" value={plForm.estimatedMaxProjectPeriod} onChange={(e) => setPlForm({ ...plForm, estimatedMaxProjectPeriod: e.target.value })} placeholder="e.g. 6 Months" className="w-full border p-2.5 rounded-xl text-xs" />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-[11px] font-bold text-slate-600">Maximum Contract Value of Any One Project (AED)</label>
-                        <input type="text" value={plForm.maxContractValueOfAnyOneProject} onChange={(e) => setPlForm({ ...plForm, maxContractValueOfAnyOneProject: e.target.value })} className="w-full border p-2.5 rounded-xl text-xs" />
-                      </div>
+                    <div className="grid grid-cols-1 gap-3">
+                      {[
+                        { key: "extPropertyBeingWorkedUpon", title: "A. Property being worked upon / Contract works and materials", desc: "Covers liability for physical damage caused directly to third-party contract materials or structural projects on which your employees are actively performing labor." },
+                        { key: "extPropertyUnderCareCustodyControl", title: "B. Property under care, custody and control", desc: "Extends coverage to physical damage or loss occurring to third-party assets left directly under your custody or supervision for maintenance, holding, or storage." },
+                        { key: "extPrincipalsExistingProperty", title: "C. Principal's existing and surrounding property", desc: "Protects against accidental damages to preexisting structural facilities or adjacent lands owned by the client/principal on whose site your company is working." }
+                      ].map((ext) => {
+                        const checked = (plForm as any)[ext.key] as boolean;
+                        return (
+                          <div
+                            key={ext.key}
+                            onClick={() => setPlForm({ ...plForm, [ext.key]: !checked })}
+                            className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex items-start gap-3 select-none ${
+                              checked ? "border-blue-900 bg-blue-50/30" : "border-slate-100 bg-white hover:border-slate-200"
+                            }`}
+                          >
+                            <div className={`w-5 h-5 mt-0.5 rounded flex items-center justify-center border shrink-0 ${checked ? "border-blue-900 bg-blue-900 text-white" : "border-slate-300 bg-white"}`}>
+                              {checked && <Check size={13} className="stroke-[3]" />}
+                            </div>
+                            <div>
+                              <span className="text-xs font-black text-slate-800 block">{ext.title}</span>
+                              <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">{ext.desc}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* PL Tab 3: Cover & History */}
-              {activeTab === 3 && (
-                <div className="space-y-8 animate-in fade-in duration-150">
-                  {/* Section 5 Insurance requirements */}
-                  <div className="space-y-4">
-                    <h3 className="text-xs font-black text-blue-950 uppercase tracking-widest border-b pb-1">SECTION 5. INSURANCE REQUIREMENTS</h3>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-extrabold text-slate-700">Limit of Indemnity (AED)</label>
-                        <input type="text" value={plForm.limitOfIndemnity} onChange={(e) => setPlForm({ ...plForm, limitOfIndemnity: e.target.value })} className="w-full bg-slate-50 border p-2.5 rounded-xl text-xs font-bold text-slate-800" />
+              {/* STEP 4: Uploads */}
+              {activeTab === 4 && (
+                <div className="space-y-6 animate-in fade-in duration-150">
+                  <h3 className="text-xs font-black text-blue-950 uppercase tracking-widest border-b pb-1">Document & Asset Uploads</h3>
+                  <p className="text-[11px] text-slate-500 -mt-3">
+                    Attach a copy of your valid Trade License and site/location photos to expedite insurance underwriter validation.
+                  </p>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <label className="text-xs font-extrabold text-slate-700 flex items-center gap-1.5"><FileText size={14} className="text-slate-400" /> Corporate Trade License</label>
+                        {plForm.tradeLicenseFile && (
+                          <span className="text-[10px] font-black text-green-600 bg-green-50 px-2 py-0.5 rounded-full border border-green-100 flex items-center gap-1">
+                            <CheckCircle size={11} /> Ready
+                          </span>
+                        )}
                       </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-extrabold text-slate-700">Deductible / Excess Required</label>
-                        <input type="text" value={plForm.deductible} onChange={(e) => setPlForm({ ...plForm, deductible: e.target.value })} placeholder="Leave blank if none" className="w-full border p-2.5 rounded-xl text-xs font-bold text-slate-800" />
+                      <div
+                        onClick={() => handlePlSimUpload("license")}
+                        className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[140px] ${
+                          plForm.tradeLicenseFile
+                            ? "border-green-300 bg-green-50/10"
+                            : plErrors.tradeLicenseFile
+                            ? "border-rose-300 bg-rose-50/10 hover:border-rose-400"
+                            : "border-slate-200 hover:border-blue-900 hover:bg-slate-50/50"
+                        }`}
+                      >
+                        {plForm.tradeLicenseFile ? (
+                          <div className="space-y-2">
+                            <div className="p-3 bg-green-100 text-green-700 rounded-lg inline-block"><FileText size={26} /></div>
+                            <p className="text-xs font-bold text-slate-800">{plForm.tradeLicenseFile}</p>
+                            <button type="button" onClick={(e) => { e.stopPropagation(); setPlForm({ ...plForm, tradeLicenseFile: "" }); }} className="text-[11px] font-bold text-rose-500 inline-flex items-center gap-1 px-3 py-1 bg-rose-50 border border-rose-100 rounded-md">
+                              <Trash2 size={12} /> Remove file
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="space-y-2">
+                            <div className="p-3 bg-slate-100 text-slate-400 rounded-lg inline-block"><UploadCloud size={22} /></div>
+                            <p className="text-xs font-bold text-slate-800">Click to simulate upload</p>
+                            <p className="text-[10px] text-slate-400">Supports PDF, PNG, JPG (Max 10MB)</p>
+                          </div>
+                        )}
                       </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-extrabold text-slate-700">Geographical Limit/Jurisdiction Required</label>
-                        <input type="text" value={plForm.geographicalLimitRequired} placeholder="e.g. UAE / GCC / Worldwide" onChange={(e) => setPlForm({ ...plForm, geographicalLimitRequired: e.target.value })} className="w-full border p-2.5 rounded-xl text-xs font-bold text-slate-800" />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="text-xs font-extrabold text-slate-700">Have you ever had insurance declined or cancelled?</label>
-                        <input type="text" value={plForm.insuranceDeclinedOrCancelled} onChange={(e) => setPlForm({ ...plForm, insuranceDeclinedOrCancelled: e.target.value })} className="w-full border p-2.5 rounded-xl text-xs font-bold text-slate-800" />
-                      </div>
+                      {plErrors.tradeLicenseFile && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.tradeLicenseFile}</p>}
                     </div>
 
-                    {/* Specific covers checklist */}
-                    <div className="bg-slate-50/50 p-5 rounded-2xl border border-slate-100 space-y-3">
-                      <p className="text-xs font-black text-slate-800 uppercase tracking-wider block">Please advise if below covers are required:</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {[
-                          { key: "coverPrincipalPropertiesRequired", label: "Principal's Existing and Surrounding Properties" },
-                          { key: "coverPropertyBeingWorkedUponRequired", label: "Property being worked upon" },
-                          { key: "coverParticipantStudentLiabilityRequired", label: "Participant/Student Liability" },
-                          { key: "coverFoodAndDrinksRequired", label: "Food and Drinks Cover" }
-                        ].map((item) => (
-                          <div key={item.key} className="flex justify-between items-center bg-white p-2.5 rounded-lg border border-slate-150">
-                            <span className="text-xs font-bold text-slate-700">{item.label}</span>
-                            <select 
-                              value={(plForm as any)[item.key]} 
-                              onChange={(e) => setPlForm({ ...plForm, [item.key]: e.target.value })}
-                              className="bg-slate-50 border p-1 rounded text-xs font-bold text-slate-800"
-                            >
-                              <option value="">-- No/Yes --</option>
-                              <option value="No">NO</option>
-                              <option value="Yes">YES</option>
-                            </select>
-                          </div>
-                        ))}
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <label className="text-xs font-extrabold text-slate-700 flex items-center gap-1.5"><ImageIcon size={14} className="text-slate-400" /> Site / Location Photos</label>
+                        {plForm.sitePhotos.length > 0 && (
+                          <span className="text-[10px] font-black text-blue-900 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">{plForm.sitePhotos.length} {plForm.sitePhotos.length === 1 ? "Photo" : "Photos"}</span>
+                        )}
                       </div>
+                      <div
+                        onClick={() => handlePlSimUpload("photo")}
+                        className="border-2 border-dashed border-slate-200 hover:border-blue-900 hover:bg-slate-50/50 rounded-xl p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[140px]"
+                      >
+                        <div className="space-y-2">
+                          <div className="p-3 bg-slate-100 text-slate-400 rounded-lg inline-block"><ImageIcon size={22} /></div>
+                          <p className="text-xs font-bold text-slate-800">Click to add a photo</p>
+                          <p className="text-[10px] text-slate-400">Supports JPG, PNG (multiple)</p>
+                        </div>
+                      </div>
+                      {plForm.sitePhotos.length > 0 && (
+                        <div className="flex flex-wrap gap-2 pt-1">
+                          {plForm.sitePhotos.map((name, i) => (
+                            <span key={i} className="text-[10px] font-bold text-slate-600 bg-slate-50 border border-slate-200 px-2 py-1 rounded-lg flex items-center gap-1.5">
+                              {name}
+                              <button type="button" onClick={() => setPlForm({ ...plForm, sitePhotos: plForm.sitePhotos.filter((_, idx) => idx !== i) })} className="text-slate-400 hover:text-rose-500">
+                                <Trash2 size={11} />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* STEP 5: Review & Sign */}
+              {activeTab === 5 && (
+                <div className="space-y-6 animate-in fade-in duration-150">
+                  <h3 className="text-xs font-black text-blue-950 uppercase tracking-widest border-b pb-1">Review & Sign</h3>
+
+                  {Object.keys(plErrors).length > 0 ? (
+                    <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-900 space-y-2">
+                      <div className="flex gap-2 items-center">
+                        <AlertCircle size={16} className="text-rose-600 shrink-0" />
+                        <span className="font-black text-xs">Please correct validation errors before submitting:</span>
+                      </div>
+                      <ul className="list-disc pl-5 text-[11px] space-y-1 text-rose-700 font-bold">
+                        {Object.entries(plErrors).map(([key, msg]) => (
+                          <li key={key}>{msg}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-green-900 flex gap-3 items-center">
+                      <CheckCircle size={18} className="text-green-600 shrink-0" />
+                      <div>
+                        <span className="font-black text-xs block">Validation Passed Successfully</span>
+                        <span className="text-[11px] text-green-700">All mandatory fields are filled out and meet policy criteria.</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-5 text-xs">
+                    <div className="border border-slate-200 rounded-2xl p-4 space-y-1.5">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Company & Contact</p>
+                      <p className="font-bold text-slate-800">{plForm.companyName || "--"} &middot; {plForm.tradeLicenseNumber || "--"}</p>
+                      <p className="text-slate-600">{plForm.contactPerson || "--"} &middot; {plForm.contactEmail || "--"} &middot; {plForm.contactPhone || "--"}</p>
+                    </div>
+
+                    <div className="border border-slate-200 rounded-2xl p-4 space-y-2">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Risk Locations ({plForm.locations.length})</p>
+                      {plForm.locations.map((loc, idx) => (
+                        <div key={loc.id} className="flex justify-between gap-4 border-b border-slate-100 last:border-0 pb-1.5 last:pb-0">
+                          <span className="text-slate-600">#{idx + 1} {loc.address || "No address entered"} &middot; {loc.occupancy}</span>
+                          <span className="font-black text-blue-900 shrink-0">{loc.limitOfIndemnity ? `AED ${loc.limitOfIndemnity}` : "--"}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="border border-slate-200 rounded-2xl p-4 space-y-1">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Off-site Operations</p>
+                      {plForm.offsiteCoverRequired === "no" ? (
+                        <p className="text-slate-500 italic">No offsite operations cover requested.</p>
+                      ) : (
+                        <p className="text-slate-600">{plForm.offsiteLocation || "--"} &middot; AED {plForm.offsiteLimitOfIndemnity || "--"} &middot; {plForm.offsiteGeographicalLimit}</p>
+                      )}
+                    </div>
+
+                    <div className="border border-slate-200 rounded-2xl p-4 space-y-1">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Liability Extensions</p>
+                      <p className="text-slate-600">
+                        {[
+                          plForm.extPropertyBeingWorkedUpon && "Property being worked upon",
+                          plForm.extPropertyUnderCareCustodyControl && "Property under care, custody and control",
+                          plForm.extPrincipalsExistingProperty && "Principal's existing and surrounding property"
+                        ].filter(Boolean).join(", ") || "None selected"}
+                      </p>
+                    </div>
+
+                    <div className="border border-slate-200 rounded-2xl p-4 space-y-1">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Attachments</p>
+                      <p className="text-slate-600">{plForm.tradeLicenseFile || "No trade license uploaded"} &middot; {plForm.sitePhotos.length} photo(s)</p>
                     </div>
                   </div>
 
-                  {/* Section 6 Claims */}
-                  <div className="space-y-4">
-                    <h3 className="text-xs font-black text-blue-950 uppercase tracking-widest border-b pb-1">SECTION 6. CLAIMS</h3>
-                    <div className="space-y-4">
-                      <div className="space-y-1">
-                        <label className="text-xs font-extrabold text-slate-700 block">Give particulars of all claims made against you during the past five years (whether or not payment made):</label>
-                        <textarea rows={2} value={plForm.claimsPast5YearsDetails} onChange={(e) => setPlForm({ ...plForm, claimsPast5YearsDetails: e.target.value })} placeholder="Describe details of any lawsuits or claims, otherwise type NIL" className="w-full border p-3 rounded-xl text-xs" />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-xs font-extrabold text-slate-700 block">Are you aware of any incidents, not yet reserved that may result in claims against you?</label>
-                        <textarea rows={2} value={plForm.awareOfIncidentsDetails} onChange={(e) => setPlForm({ ...plForm, awareOfIncidentsDetails: e.target.value })} placeholder="Describe any incidents, otherwise leave blank" className="w-full border p-3 rounded-xl text-xs" />
-                      </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-extrabold text-slate-700">Electronic Signature (Full Name)</label>
+                      <input type="text" value={plForm.signatureName} onChange={(e) => setPlForm({ ...plForm, signatureName: e.target.value })} placeholder="Type your full name to sign" className="w-full bg-white border border-slate-200 py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950" />
                     </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-extrabold text-slate-700 flex items-center gap-1.5"><Calendar size={13} className="text-slate-400" /> Date</label>
+                      <input type="date" value={plForm.signatureDate} onChange={(e) => setPlForm({ ...plForm, signatureDate: e.target.value })} className="w-full bg-white border border-slate-200 py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950" />
+                    </div>
+                  </div>
 
-                    <div className="pt-3">
-                      <label className="flex items-start gap-3 cursor-pointer select-none">
-                        <input 
-                          type="checkbox" 
-                          checked={plForm.agreedToDeclaration}
-                          onChange={(e) => setPlForm({...plForm, agreedToDeclaration: e.target.checked})}
-                          className="w-4 h-4 rounded border-slate-300 mt-0.5 text-blue-900 focus:ring-blue-900 cursor-pointer" 
-                        />
-                        <span className="text-xs font-extrabold text-slate-800">
-                          I declare that all details in this Standalone Public Liability Proposal are accurate. I accept the policy underwriting conditions.
-                        </span>
-                      </label>
-                    </div>
+                  <div className="pt-3">
+                    <label className="flex items-start gap-3 cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={plForm.agreedToDeclaration}
+                        onChange={(e) => setPlForm({ ...plForm, agreedToDeclaration: e.target.checked })}
+                        className="w-4 h-4 rounded border-slate-300 mt-0.5 text-blue-900 focus:ring-blue-900 cursor-pointer"
+                      />
+                      <span className="text-xs font-extrabold text-slate-800">
+                        I declare that all details in this Public Liability Proposal are accurate. I accept the policy underwriting conditions.
+                      </span>
+                    </label>
                   </div>
                 </div>
               )}
@@ -1539,18 +1985,18 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                   disabled={activeTab === 1}
                   onClick={() => setActiveTab(prev => Math.max(1, prev - 1))}
                   className={`py-2.5 px-5 rounded-xl text-xs font-bold border transition-colors cursor-pointer ${
-                    activeTab === 1 
-                      ? "border-slate-100 text-slate-300 cursor-not-allowed" 
+                    activeTab === 1
+                      ? "border-slate-100 text-slate-300 cursor-not-allowed"
                       : "border-slate-200 hover:bg-slate-50 text-slate-600"
                   }`}
                 >
                   Previous Section
                 </button>
 
-                {activeTab < 3 ? (
+                {activeTab < 5 ? (
                   <button
                     type="button"
-                    onClick={() => setActiveTab(prev => Math.min(3, prev + 1))}
+                    onClick={() => setActiveTab(prev => Math.min(5, prev + 1))}
                     className="bg-blue-900 hover:bg-blue-800 text-white py-2.5 px-6 rounded-xl text-xs font-black cursor-pointer transition-colors"
                   >
                     Next Section
@@ -1558,9 +2004,9 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                 ) : (
                   <button
                     type="submit"
-                    disabled={submitting || !plForm.agreedToDeclaration}
+                    disabled={submitting || !plForm.agreedToDeclaration || Object.keys(plErrors).length > 0}
                     className={`font-black text-xs py-3.5 px-8 rounded-xl flex items-center gap-1.5 shadow-md ${
-                      !plForm.agreedToDeclaration || submitting
+                      !plForm.agreedToDeclaration || submitting || Object.keys(plErrors).length > 0
                         ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
                         : "bg-yellow-400 hover:bg-yellow-500 text-blue-950 shadow-yellow-400/10 cursor-pointer"
                     }`}

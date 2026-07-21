@@ -17,6 +17,7 @@ interface ProceedOptionsViewProps {
 export const ProceedOptionsView: React.FC<ProceedOptionsViewProps> = ({
   lead,
   onBack,
+  onSelectOnlineFill,
   onCompleteFlow
 }) => {
   // Ensure we have at least some products to avoid errors
@@ -341,8 +342,6 @@ export const ProceedOptionsView: React.FC<ProceedOptionsViewProps> = ({
       InsuranceProduct.PropertyAllRiskBI,
       InsuranceProduct.BusinessInterruption,
       InsuranceProduct.FireAndAllied,
-      InsuranceProduct.PublicLiability,
-      InsuranceProduct.PublicLiabilitySelect,
       InsuranceProduct.MoneyInsurance,
       InsuranceProduct.MachineryBreakdown,
       InsuranceProduct.MachineryBreakdownSelect
@@ -1295,6 +1294,24 @@ export const ProceedOptionsView: React.FC<ProceedOptionsViewProps> = ({
                       </p>
                     </div>
                   </div>
+
+                  {/* Public Liability also has a guided digital proposal form as an alternative to the offline PDF */}
+                  {(activeProduct === InsuranceProduct.PublicLiability || activeProduct === InsuranceProduct.PublicLiabilitySelect) && onSelectOnlineFill && (
+                    <button
+                      type="button"
+                      onClick={onSelectOnlineFill}
+                      className="w-full flex items-center justify-between gap-3 border border-blue-200 bg-blue-50/60 hover:bg-blue-50 py-4 px-5 rounded-2xl cursor-pointer transition-colors text-left"
+                    >
+                      <div className="flex items-center gap-3">
+                        <Sparkles className="text-blue-900 shrink-0" size={18} />
+                        <div>
+                          <p className="text-xs font-black text-slate-800">Prefer to fill it in online instead?</p>
+                          <p className="text-[10px] text-slate-500 font-semibold mt-0.5">Use our guided 5-step Public Liability proposal form instead of downloading a PDF.</p>
+                        </div>
+                      </div>
+                      <ArrowRight size={16} className="text-blue-900 shrink-0" />
+                    </button>
+                  )}
 
                   {/* STEP 1: DOWNLOAD FILE */}
                   <div className="space-y-2.5">
