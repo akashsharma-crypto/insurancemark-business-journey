@@ -27,7 +27,74 @@ const PL_OCCUPANCY_OPTIONS = [
   "Others"
 ];
 
-const PL_GEOGRAPHICAL_LIMITS = ["UAE", "GCC", "Worldwide excl. US and Canada", "Worldwide inc. US & Canada"];
+export const PL_NATURE_OF_BUSINESS_OPTIONS = ['General Trading','Electronics Trading','Building Materials Trading','Chemicals & Solvents Trading','Food Commodities Trading','Furniture Trading','Medical Equipment Trading','Textile & Garments Trading','Auto Parts Trading','Machinery & Equipment Trading','Jewellery & Precious Metals Trading','Agricultural Products Trading','Cosmetics & Perfumes Trading','Office Supplies Trading','Industrial Equipment Trading','Supermarket / Hypermarket','Fashion & Clothing Store','Electronics & Gadgets Retail','Online Retail / E-Commerce Platform','Pharmacy & Drug Store','Jewellery Store','Toy Store','Sporting Goods Store','Home Appliances Store','Furniture Showroom','Bookstore & Stationery','Perfume & Cosmetics Store','Mobile Phone Retail','Convenience Store','Specialty Food Retail','Restaurant','Café & Coffee Shop','Fast Food Outlet','Food Delivery Service','Catering Company','Bakery & Confectionery','Cloud Kitchen','Food Manufacturing','Food Import & Distribution','Snack & Beverage Production','Juice Bar','Dessert Shop','Food Truck','Meat Processing','Dairy Products','5-Star Hotel','4-Star Hotel','3-Star / Budget Hotel','Hotel Apartment','Serviced Apartment','Holiday Home (Short-Term Rental)','Hostel / Backpacker','Resort & Beach Club','Guest House','Motel','Furnished Apartments','Boutique Hotel','Heritage Hotel','Staff Accommodation','Holiday Home Management Company','Real Estate Developer','Property Management Company','Real Estate Brokerage','Facility Management – Residential','Strata Management','Co-Working Space Operator','Property Valuation Firm','Real Estate Investment Trust (REIT)','Warehouse / Storage Leasing','Commercial Property Leasing','Mixed-Use Development','Community Management','Short-Term Rental Management','Real Estate Consultancy','Property Maintenance Services','Civil & Structural Contractor','MEP Contractor (Mechanical, Electrical, Plumbing)','Interior Fit-Out Contractor','Roads & Infrastructure Contractor','Demolition & Site Clearing','Piling & Foundation Contractor','Waterproofing & Insulation Contractor','Steel Fabrication & Erection','Glass & Aluminium Works','Landscaping Contractor','Swimming Pool Contractor','Flooring & Tiling Contractor','Painting & Decorating Contractor','Scaffolding & Formwork','Fire Protection Systems Contractor','Structural Engineering Consultancy','MEP Engineering Consultancy','Geotechnical Engineering','Environmental Engineering','Electrical Engineering Services','HVAC Engineering','Fire Safety Engineering','Elevator & Escalator Maintenance','Technical Inspection Services','Testing & Commissioning','Surveying & Mapping','Project Management Consultancy','Cost Consultancy / Quantity Surveying','BIM & Digital Engineering','Renewable Energy Engineering','General Hospital','Specialist Clinic','Dental Clinic','Optical Clinic','Physiotherapy Center','Diagnostic Laboratory','Radiology Center','Pharmacy','Home Healthcare Services','Aesthetic & Cosmetic Clinic','Fertility Clinic','Psychiatric & Mental Health Clinic','Ambulance Services','Medical Equipment Supplier','Wellness & Preventive Health Center','Private School (K-12)','Nursery & Early Childhood','University / Higher Education','Vocational & Technical Training','Corporate Training Provider','Language Institute','Tutoring & Coaching Center','STEM Education Provider','Sports Academy','Arts & Music School','Online Learning Platform','Professional Certification Body','Driving School','Aviation Training','Special Needs Education Center','Commercial Bank','Investment Bank','Exchange & Remittance','Insurance Brokerage','Asset Management Company','Investment Advisory','Financial Planning Firm','Audit & Accounting Firm','Venture Capital / Private Equity','Mortgage Brokerage','Payment & FinTech Company','Microfinance Institution','Crowdfunding Platform','Commodity Brokerage','Wealth Management','Law Firm / Legal Consultancy','Corporate Secretary Services','Taxation & VAT Consultancy','Business Setup Consultancy','Management Consultancy','HR & Recruitment Consultancy','Public Relations (PR) Agency','Strategy Consultancy','Regulatory & Compliance Consultancy','Immigration Consultancy','Trademark & IP Firm','Arbitration & Dispute Resolution','Notary Services','CSR Consultancy','Risk & Governance Consultancy','Software Development Company','IT Consultancy','Cybersecurity Firm','Cloud Services Provider','Data Analytics & AI Company','Telecom Operator','IT Infrastructure & Networking','Mobile App Development','E-Commerce Platform Development','ERP Implementation','Managed IT Services (MSP)','IoT Solutions','Blockchain & Web3 Company','Digital Transformation Consultancy','IT Hardware Reseller','Advertising Agency','Digital Marketing Agency','PR & Communications Agency','Event Management Company','Film & TV Production','Photography Studio','Social Media Agency','Content Creation Studio','Brand Consultancy','Exhibition & Trade Show Organiser','Music & Entertainment','Publishing House','Market Research Firm','Outdoor Advertising','Influencer Marketing Agency','Freight Forwarding','Customs Clearance Agent','Courier & Last-Mile Delivery','Third-Party Logistics (3PL)','Warehousing & Distribution','Cold Chain Logistics','Sea Freight Operator','Air Freight Operator','Road Haulage & Trucking','Project Cargo & Heavy Lift','Supply Chain Consultancy','E-Fulfillment Center','Reverse Logistics','Port & Terminal Operations','Packing & Moving Services','Metal Fabrication & Steel Works','Plastic & Rubber Manufacturing','Chemical Manufacturing','Food & Beverage Production','Pharmaceutical Manufacturing','Textile & Garment Manufacturing','Wood & Furniture Manufacturing','Paper & Packaging Manufacturing','Electronics Manufacturing','Construction Materials Manufacturing','Glass Manufacturing','Paint & Coatings Manufacturing','Printing & Packaging','Consumer Goods Manufacturing','Industrial Equipment Manufacturing','Oil Exploration & Production','Gas Processing & Distribution','Petroleum Refinery','Oilfield Services','Pipeline & Storage','LNG / LPG Distribution','Renewable Energy (Solar, Wind)','Energy Trading','Power Generation & Utilities','Energy Engineering & EPC','Petro-chemicals','Fuel Retail & Distribution','Energy Consultancy','Carbon Credits & Sustainability','Offshore Operations','Ship Owner & Operator','Ship Management Company','Marine Contracting & Diving','Port & Terminal Operator','Vessel Chartering & Brokerage','Marine Engineering','Boat & Yacht Sales','Fishing & Aquaculture','Offshore Supply Vessel (OSV) Operator','Marine Surveyors','Dredging & Reclamation','Marine Fuel Supply','Towage & Salvage','Marine Logistics','Dry Dock & Shipyard','Commercial Airline','Charter & Private Aviation','Cargo Airline','MRO (Maintenance, Repair & Overhaul)','Ground Handling Services','Aviation Training Academy','Aerospace Manufacturing','Airport Operations','Air Traffic Management','Unmanned Aerial Systems (Drones)','Aviation Consultancy','Aircraft Leasing','FBO (Fixed-Base Operator)','Helipad & Heliport Services','Avionics & Systems','Crop Farming & Horticulture','Livestock Farming','Poultry & Eggs Production','Aquaculture & Fish Farming','Organic Farming','Greenhouse Farming','Food Processing Plant','Meat Processing & Packing','Dairy Processing','Flour Milling','Edible Oil Processing','Spice & Condiment Production','Snack Food Production','Agri-Tech & Smart Farming','Agricultural Consultancy','Travel Agency (Outbound)','Travel Agency (Inbound / DMC)','Tour Operator','Visa & Documentation Services','Adventure Tourism','Cultural Tourism','Medical Tourism Facilitator','Online Travel Agency (OTA)','Cruise Services','Heritage & Museum Tourism','Desert & Safari Tourism','City Tours & Sightseeing','MICE (Meetings, Incentives, Conferences, Events)','Airline GSA / Representation','Tourism Consultancy','Salon & Barbershop','Spa & Massage Center','Beauty Clinic (Non-Medical)','Nail & Lash Studio','Tattoo & Body Art Studio','Wellness & Meditation Center','Yoga & Pilates Studio','Fitness & Gym','Slimming & Weight Management Center','Makeup Artist (Freelance/Studio)','Aesthetic Training Institute',"Men's Grooming Lounge",'Tanning & Solarium','Hair Transplant Clinic (Medical)','Holistic Health Center','Integrated Facility Management (IFM)','Cleaning & Janitorial Services','Pest Control','Waste Management & Recycling','Security & Guarding Services','Parking Management','Elevator Maintenance','HVAC Maintenance','Soft Services (Landscaping, Reception)','Hard Services (MEP Maintenance)','Property Maintenance','Pool & Water Feature Maintenance','Fire & Safety Systems Maintenance','Laundry & Linen Services','Concierge Services','Federal Government Entity','Emirate Government Department','Government-Linked Company (GLC)','Free Zone Authority','Municipality','Public Utility (Water, Electricity)','Government Investment Arm / SWF','Regulatory Authority','Public Transport Operator','Government Hospital / Health Authority','Government School / University','Cultural & Heritage Authority','Sports & Recreation Authority','Environment Agency','Port Authority','Charity & Humanitarian Organisation','Trade Association','Professional Association','Sports Club','Religious Organisation','Cultural Association','Foundation & Grant-Making Body','Community Development Association','Research & Think Tank','Advocacy & Lobbying Group','Animal Welfare Organisation','Youth Development Organisation','Environmental NGO','Alumni Association','Industry Regulatory Body','New Car Dealership','Used Car Dealership','Auto Service & Repair Workshop','Car Rental Company','Tyre & Accessories Shop','Car Wash & Detailing','Auto Parts Trading & Distribution','Fleet Management Services','Speciality Vehicle Manufacturer / Modifier','EV Charging Infrastructure','Motorcycle Sales & Repair','Commercial Vehicle Dealership','Auto Finance','Classic Car Restoration','Driving School (Vehicles)'];
+
+const PL_GEOGRAPHICAL_LIMITS = ['UAE','GCC','Worldwide including US & Canada','Worldwide excluding US & Canada'];
+const PL_GCC_COUNTRIES = ['UAE','Saudi Arabia','Kuwait','Qatar','Bahrain','Oman'];
+const PL_US_CANADA_COUNTRIES = ['United States','Canada'];
+const PL_PROJECT_DURATION_OPTIONS = ['Less than 3 months','3 to 6 months','6 to 12 months','1 to 2 years','2 to 5 years','More than 5 years'];
+const PL_CONSTRUCTION_CONTRACTING_ACTIVITIES = ['Civil & Structural Contractor','MEP Contractor (Mechanical, Electrical, Plumbing)','Interior Fit-Out Contractor','Roads & Infrastructure Contractor','Demolition & Site Clearing','Piling & Foundation Contractor','Waterproofing & Insulation Contractor','Steel Fabrication & Erection','Glass & Aluminium Works','Landscaping Contractor','Swimming Pool Contractor','Flooring & Tiling Contractor','Painting & Decorating Contractor','Scaffolding & Formwork','Fire Protection Systems Contractor','Structural Engineering Consultancy','MEP Engineering Consultancy','Geotechnical Engineering','Environmental Engineering','Electrical Engineering Services','HVAC Engineering','Fire Safety Engineering','Technical Inspection Services','Testing & Commissioning','Surveying & Mapping','Project Management Consultancy','Cost Consultancy / Quantity Surveying','BIM & Digital Engineering','Renewable Energy Engineering'];
+const PL_MANUFACTURING_PRODUCTION_ACTIVITIES = ['Food Manufacturing','Snack & Beverage Production','Metal Fabrication & Steel Works','Plastic & Rubber Manufacturing','Chemical Manufacturing','Food & Beverage Production','Pharmaceutical Manufacturing','Textile & Garment Manufacturing','Wood & Furniture Manufacturing','Paper & Packaging Manufacturing','Electronics Manufacturing','Construction Materials Manufacturing','Glass Manufacturing','Paint & Coatings Manufacturing','Printing & Packaging','Consumer Goods Manufacturing','Industrial Equipment Manufacturing','Food Processing Plant','Meat Processing & Packing','Dairy Processing','Flour Milling','Edible Oil Processing','Spice & Condiment Production','Snack Food Production'];
+const PL_MAINTENANCE_FACILITIES_ACTIVITIES = ['Property Maintenance Services','Elevator & Escalator Maintenance','Integrated Facility Management (IFM)','Cleaning & Janitorial Services','Pest Control','Waste Management & Recycling','Security & Guarding Services','Parking Management','Elevator Maintenance','HVAC Maintenance','Soft Services (Landscaping, Reception)','Hard Services (MEP Maintenance)','Property Maintenance','Pool & Water Feature Maintenance','Fire & Safety Systems Maintenance','Laundry & Linen Services','Concierge Services'];
+// Selecting one of these activities implies off-site / on-site-contract exposure, so
+// off-site cover is auto-enabled (matching the reference Public Liability app's behavior).
+const PL_OFFSITE_AUTO_YES_ACTIVITIES: string[] = ([] as string[]).concat(
+  PL_CONSTRUCTION_CONTRACTING_ACTIVITIES,
+  PL_MANUFACTURING_PRODUCTION_ACTIVITIES,
+  PL_MAINTENANCE_FACILITIES_ACTIVITIES
+);
+
+interface PLOffsiteEntry {
+  id: string;
+  coverType: "annual" | "project";
+  location: string;
+  limitOfIndemnity: string;
+  geographicalLimit: string;
+  manualWorkEmployees: "yes" | "no";
+  annualTurnover: string;
+  turnoverSplitDetails: string;
+  gccCountries: string[];
+  gccTurnoverByCountry: Record<string, string>;
+  usCanadaCountries: string[];
+  usCanadaTurnoverByCountry: Record<string, string>;
+  estimatedProjects: string;
+  numberOfEmployees: string;
+  subcontractedWork: "yes" | "no";
+  subcontractedServices: string;
+  subcontractedPercentage: string;
+  projectTitle: string;
+  projectContractValue: string;
+  projectLiabilityLimit: string;
+  projectDuration: string;
+  projectLocation: string;
+  projectScopeOfWork: string;
+}
+
+const createEmptyPLOffsiteEntry = (id: string): PLOffsiteEntry => ({
+  id,
+  coverType: "annual",
+  location: "",
+  limitOfIndemnity: "",
+  geographicalLimit: "UAE",
+  manualWorkEmployees: "no",
+  annualTurnover: "",
+  turnoverSplitDetails: "",
+  gccCountries: [],
+  gccTurnoverByCountry: {},
+  usCanadaCountries: [],
+  usCanadaTurnoverByCountry: {},
+  estimatedProjects: "",
+  numberOfEmployees: "",
+  subcontractedWork: "no",
+  subcontractedServices: "",
+  subcontractedPercentage: "",
+  projectTitle: "",
+  projectContractValue: "",
+  projectLiabilityLimit: "",
+  projectDuration: "",
+  projectLocation: "",
+  projectScopeOfWork: ""
+});
 
 interface PLLocation {
   id: string;
@@ -262,6 +329,7 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
     return {
       companyName: lead.companyName || "",
       tradeLicenseNumber: lead.tradeLicense || "",
+      businessActivity: "",
       businessDescription: lead.businessDescription || lead.businessActivity || (vc?.activities && vc.activities.join(", ")) || "",
       contactPerson: lead.contactName || "",
       contactEmail: lead.contactEmail || "",
@@ -271,17 +339,7 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
       locations: [{ ...createEmptyPLLocation("1"), address: vc?.address || "" }] as PLLocation[],
 
       offsiteCoverRequired: "no" as "yes" | "no",
-      offsiteLocation: "",
-      offsiteLimitOfIndemnity: "",
-      offsiteGeographicalLimit: "UAE",
-      offsiteManualWorkEmployees: "no" as "yes" | "no",
-      offsiteAnnualTurnover: "",
-      offsiteTurnoverSplitDetails: "",
-      offsiteEstimatedProjects: "",
-      offsiteNumberOfEmployees: "",
-      offsiteSubcontractedWork: "no" as "yes" | "no",
-      offsiteSubcontractedServices: "",
-      offsiteSubcontractedPercentage: "",
+      offsiteEntries: [] as PLOffsiteEntry[],
 
       extPropertyBeingWorkedUpon: false,
       extPropertyUnderCareCustodyControl: false,
@@ -320,6 +378,59 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
     }
   };
 
+  // Selecting a construction/manufacturing/maintenance-type business activity implies
+  // on-site-contract exposure, so off-site cover is auto-enabled (matches the reference app).
+  const handlePlBusinessActivityChange = (value: string) => {
+    if (PL_OFFSITE_AUTO_YES_ACTIVITIES.indexOf(value) !== -1) {
+      const entries = plForm.offsiteEntries.length === 0 ? [createEmptyPLOffsiteEntry("1")] : plForm.offsiteEntries;
+      setPlForm({ ...plForm, businessActivity: value, offsiteCoverRequired: "yes", offsiteEntries: entries });
+    } else {
+      setPlForm({ ...plForm, businessActivity: value });
+    }
+  };
+
+  const handlePlOffsiteCoverRequiredChange = (val: "yes" | "no") => {
+    const entries = val === "yes" && plForm.offsiteEntries.length === 0 ? [createEmptyPLOffsiteEntry("1")] : plForm.offsiteEntries;
+    setPlForm({ ...plForm, offsiteCoverRequired: val, offsiteEntries: entries });
+  };
+
+  const handlePlAddOffsiteEntry = () => {
+    setPlForm({ ...plForm, offsiteEntries: [...plForm.offsiteEntries, createEmptyPLOffsiteEntry(String(plForm.offsiteEntries.length + 1))] });
+  };
+
+  const handlePlRemoveOffsiteEntry = (idx: number) => {
+    setPlForm({ ...plForm, offsiteEntries: plForm.offsiteEntries.filter((_, i) => i !== idx) });
+  };
+
+  const handlePlOffsiteEntryChange = (idx: number, key: keyof PLOffsiteEntry, value: any) => {
+    const updated = plForm.offsiteEntries.map((entry, i) => (i === idx ? { ...entry, [key]: value } : entry));
+    setPlForm({ ...plForm, offsiteEntries: updated });
+  };
+
+  const handlePlOffsiteEntryMoneyChange = (idx: number, key: keyof PLOffsiteEntry, raw: string) => {
+    const clean = raw.replace(/[^0-9]/g, "");
+    handlePlOffsiteEntryChange(idx, key, clean ? Number(clean).toLocaleString("en-US") : "");
+  };
+
+  const handlePlToggleOffsiteCountry = (idx: number, field: "gccCountries" | "usCanadaCountries", country: string) => {
+    const entry = plForm.offsiteEntries[idx];
+    const list = entry[field];
+    const updatedList = list.indexOf(country) === -1 ? [...list, country] : list.filter((c) => c !== country);
+    handlePlOffsiteEntryChange(idx, field, updatedList);
+  };
+
+  const handlePlOffsiteCountryTurnoverChange = (
+    idx: number,
+    field: "gccTurnoverByCountry" | "usCanadaTurnoverByCountry",
+    country: string,
+    raw: string
+  ) => {
+    const clean = raw.replace(/[^0-9]/g, "");
+    const formatted = clean ? Number(clean).toLocaleString("en-US") : "";
+    const entry = plForm.offsiteEntries[idx];
+    handlePlOffsiteEntryChange(idx, field, { ...entry[field], [country]: formatted });
+  };
+
   // Field-level validation mirroring the reference Public Liability flow's dynamic
   // required/optional rules (fields only become required once a prior answer triggers them).
   const plErrors = React.useMemo(() => {
@@ -334,6 +445,7 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
       errs.contactEmail = "Contact Email format is invalid.";
     }
     if (!plForm.contactPhone.trim()) errs.contactPhone = "Contact Phone is required.";
+    if (!plForm.businessActivity.trim()) errs.businessActivity = "Business Activity is required.";
     if (!plForm.businessDescription.trim()) errs.businessDescription = "Business Description is required.";
 
     plForm.locations.forEach((loc, idx) => {
@@ -348,24 +460,95 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
     });
 
     if (plForm.offsiteCoverRequired === "yes") {
-      if (!plForm.offsiteLocation.trim()) errs.offsiteLocation = "Off-site Location description is required.";
-      if (!plForm.offsiteLimitOfIndemnity.trim()) errs.offsiteLimitOfIndemnity = "Overall Off-site Limit of Indemnity is required.";
-      if (!plForm.offsiteAnnualTurnover.trim()) errs.offsiteAnnualTurnover = "Annual Turnover is required for off-site cover.";
-      if (plForm.offsiteGeographicalLimit !== "UAE" && !plForm.offsiteTurnoverSplitDetails.trim()) {
-        errs.offsiteTurnoverSplitDetails = "Turnover country split is required for international geographical coverage.";
-      }
-      if (!plForm.offsiteEstimatedProjects || parseInt(plForm.offsiteEstimatedProjects, 10) < 0) {
-        errs.offsiteEstimatedProjects = "Estimated projects count is required (minimum 0).";
-      }
-      if (!plForm.offsiteNumberOfEmployees || parseInt(plForm.offsiteNumberOfEmployees, 10) < 1) {
-        errs.offsiteNumberOfEmployees = "Number of employees is required (minimum 1).";
-      }
+      plForm.offsiteEntries.forEach((entry, idx) => {
+        if (entry.coverType === "project") {
+          if (!entry.projectTitle.trim()) errs[`offsite_${idx}_ptitle`] = `Title of Contract is required for Off-site Entry #${idx + 1}.`;
+          if (!entry.projectLiabilityLimit.trim()) errs[`offsite_${idx}_pliab`] = `Third Party Liability Limit is required for Off-site Entry #${idx + 1}.`;
+          if (!entry.projectLocation.trim()) errs[`offsite_${idx}_ploc`] = `Project Location is required for Off-site Entry #${idx + 1}.`;
+          if (!entry.projectScopeOfWork.trim()) errs[`offsite_${idx}_pscope`] = `Exact Scope of Work is required for Off-site Entry #${idx + 1}.`;
+        } else {
+          if (!entry.location.trim()) errs[`offsite_${idx}_loc`] = `Off-site Location is required for Off-site Entry #${idx + 1}.`;
+          if (!entry.limitOfIndemnity.trim()) errs[`offsite_${idx}_limit`] = `Off-site Location Limit of Indemnity is required for Off-site Entry #${idx + 1}.`;
+          if (!entry.estimatedProjects || parseInt(entry.estimatedProjects, 10) < 0) errs[`offsite_${idx}_projects`] = `Estimated Projects count is required for Off-site Entry #${idx + 1}.`;
+          if (!entry.numberOfEmployees || parseInt(entry.numberOfEmployees, 10) < 1) errs[`offsite_${idx}_employees`] = `Number of Employees is required for Off-site Entry #${idx + 1}.`;
+
+          if (entry.geographicalLimit === "UAE") {
+            if (!entry.annualTurnover.trim()) errs[`offsite_${idx}_turnover`] = `Annual Turnover is required for Off-site Entry #${idx + 1}.`;
+          } else if (entry.geographicalLimit === "GCC") {
+            if (entry.gccCountries.length === 0) errs[`offsite_${idx}_gcc_countries`] = `Select at least one GCC country for Off-site Entry #${idx + 1}.`;
+            entry.gccCountries.forEach((country) => {
+              if (!(entry.gccTurnoverByCountry[country] || "").trim()) errs[`offsite_${idx}_gccturnover_${country}`] = `${country} annual turnover is required for Off-site Entry #${idx + 1}.`;
+            });
+          } else if (entry.geographicalLimit === "Worldwide including US & Canada") {
+            if (entry.usCanadaCountries.length === 0) errs[`offsite_${idx}_usca_countries`] = `Select US and/or Canada for Off-site Entry #${idx + 1}.`;
+            entry.usCanadaCountries.forEach((country) => {
+              if (!(entry.usCanadaTurnoverByCountry[country] || "").trim()) errs[`offsite_${idx}_uscaturnover_${country}`] = `${country} annual turnover is required for Off-site Entry #${idx + 1}.`;
+            });
+          }
+        }
+      });
     }
 
     if (!plForm.tradeLicenseFile) errs.tradeLicenseFile = "Uploading a Trade License copy is mandatory to complete the proposal.";
 
     return errs;
   }, [plForm]);
+
+  // Renders a country chip multi-select plus a per-selected-country turnover input,
+  // used for GCC and Worldwide-including-US&Canada geographical limits.
+  const renderPlCountryTurnoverBlock = (
+    entry: PLOffsiteEntry,
+    idx: number,
+    field: "gccCountries" | "usCanadaCountries",
+    turnoverField: "gccTurnoverByCountry" | "usCanadaTurnoverByCountry",
+    countries: string[],
+    errKeyPrefix: string
+  ) => {
+    const selected = entry[field];
+    return (
+      <div className="space-y-3">
+        <div className="flex flex-wrap gap-2">
+          {countries.map((country) => {
+            const isSelected = selected.indexOf(country) !== -1;
+            return (
+              <button
+                key={country}
+                type="button"
+                onClick={() => handlePlToggleOffsiteCountry(idx, field, country)}
+                className={`px-3 py-1.5 rounded-full text-[11px] font-bold border transition-all cursor-pointer ${
+                  isSelected ? "bg-blue-900 border-blue-900 text-white" : "bg-white border-slate-200 text-slate-600 hover:border-blue-900"
+                }`}
+              >
+                {country}
+              </button>
+            );
+          })}
+        </div>
+        {selected.length > 0 && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {selected.map((country) => {
+              const errKey = `${errKeyPrefix}_${country}`;
+              return (
+                <div key={country} className="space-y-1.5">
+                  <label className="text-[11px] font-extrabold text-slate-700">{country} Annual Turnover (AED)</label>
+                  <input
+                    type="text"
+                    value={entry[turnoverField][country] || ""}
+                    onChange={(e) => handlePlOffsiteCountryTurnoverChange(idx, turnoverField, country, e.target.value)}
+                    placeholder="e.g. 5,000,000"
+                    className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                      plErrors[errKey] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                    }`}
+                  />
+                  {plErrors[errKey] && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors[errKey]}</p>}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   // Form State 3: Directors & Officers (D&O) Liability Form
   const [doForm, setDoForm] = useState(() => {
@@ -1343,6 +1526,24 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                       {plErrors.tradeLicenseNumber && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.tradeLicenseNumber}</p>}
                     </div>
 
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <label className="text-xs font-extrabold text-slate-700">Business Activity</label>
+                      <select
+                        value={plForm.businessActivity}
+                        onChange={(e) => handlePlBusinessActivityChange(e.target.value)}
+                        className={`w-full py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all cursor-pointer ${
+                          plErrors.businessActivity ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                        }`}
+                      >
+                        <option value="" disabled>Select business activity...</option>
+                        {PL_NATURE_OF_BUSINESS_OPTIONS.map((opt) => (
+                          <option key={opt} value={opt}>{opt}</option>
+                        ))}
+                      </select>
+                      {plErrors.businessActivity && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.businessActivity}</p>}
+                      <p className="text-[10px] text-slate-400">Select the option that most closely matches your registered trade license activity.</p>
+                    </div>
+
                     <div className="space-y-1.5">
                       <label className="text-xs font-extrabold text-slate-700">Primary Contact Person</label>
                       <input
@@ -1606,206 +1807,348 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                       </div>
                       <div className="flex gap-4 shrink-0">
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="radio" name="pl-offsite" checked={plForm.offsiteCoverRequired === "no"} onChange={() => setPlForm({ ...plForm, offsiteCoverRequired: "no" })} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
+                          <input type="radio" name="pl-offsite" checked={plForm.offsiteCoverRequired === "no"} onChange={() => handlePlOffsiteCoverRequiredChange("no")} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
                           <span className="text-xs font-bold text-slate-700">No</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="radio" name="pl-offsite" checked={plForm.offsiteCoverRequired === "yes"} onChange={() => setPlForm({ ...plForm, offsiteCoverRequired: "yes" })} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
+                          <input type="radio" name="pl-offsite" checked={plForm.offsiteCoverRequired === "yes"} onChange={() => handlePlOffsiteCoverRequiredChange("yes")} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
                           <span className="text-xs font-bold text-slate-700">Yes</span>
                         </label>
                       </div>
                     </div>
+                  </div>
 
-                    {plForm.offsiteCoverRequired === "yes" && (
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 bg-slate-50/40 p-5 rounded-2xl border border-slate-100">
-                        <div className="space-y-1.5">
-                          <label className="text-[11px] font-extrabold text-slate-700">Off-site Operations Locations</label>
-                          <input
-                            type="text"
-                            value={plForm.offsiteLocation}
-                            onChange={(e) => setPlForm({ ...plForm, offsiteLocation: e.target.value })}
-                            placeholder="e.g. Client sites across UAE, or dynamic projects"
-                            className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
-                              plErrors.offsiteLocation ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
-                            }`}
-                          />
-                          {plErrors.offsiteLocation && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.offsiteLocation}</p>}
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <label className="text-[11px] font-extrabold text-slate-700">Overall Limit of Indemnity Required (AED)</label>
-                          <input
-                            type="text"
-                            value={plForm.offsiteLimitOfIndemnity}
-                            onChange={(e) => {
-                              const clean = e.target.value.replace(/[^0-9]/g, "");
-                              setPlForm({ ...plForm, offsiteLimitOfIndemnity: clean ? Number(clean).toLocaleString("en-US") : "" });
-                            }}
-                            placeholder="e.g. 10,000,000"
-                            className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
-                              plErrors.offsiteLimitOfIndemnity ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
-                            }`}
-                          />
-                          {plErrors.offsiteLimitOfIndemnity && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.offsiteLimitOfIndemnity}</p>}
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <label className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1"><Map size={13} className="text-slate-400" /> Geographical Limit Required</label>
-                          <select value={plForm.offsiteGeographicalLimit} onChange={(e) => setPlForm({ ...plForm, offsiteGeographicalLimit: e.target.value })} className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950 cursor-pointer">
-                            {PL_GEOGRAPHICAL_LIMITS.map((limit) => (
-                              <option key={limit} value={limit}>{limit}</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <label className="text-[11px] font-extrabold text-slate-700">Employees Doing Manual Work?</label>
-                          <div className="flex gap-4 py-1">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                              <input type="radio" name="pl-manual" checked={plForm.offsiteManualWorkEmployees === "no"} onChange={() => setPlForm({ ...plForm, offsiteManualWorkEmployees: "no" })} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
-                              <span className="text-xs font-bold text-slate-700">No</span>
-                            </label>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                              <input type="radio" name="pl-manual" checked={plForm.offsiteManualWorkEmployees === "yes"} onChange={() => setPlForm({ ...plForm, offsiteManualWorkEmployees: "yes" })} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
-                              <span className="text-xs font-bold text-slate-700">Yes</span>
-                            </label>
-                          </div>
-                          {plForm.offsiteManualWorkEmployees === "yes" && (
-                            <p className="text-[10px] text-blue-900 font-bold">Note: Premium will adjust for manual risk exposures such as heights, tools, or machinery.</p>
-                          )}
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <label className="text-[11px] font-extrabold text-slate-700">Annual Turnover (AED)</label>
-                          <input
-                            type="text"
-                            value={plForm.offsiteAnnualTurnover}
-                            onChange={(e) => {
-                              const clean = e.target.value.replace(/[^0-9]/g, "");
-                              setPlForm({ ...plForm, offsiteAnnualTurnover: clean ? Number(clean).toLocaleString("en-US") : "" });
-                            }}
-                            placeholder="Estimated yearly sales / revenue"
-                            className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
-                              plErrors.offsiteAnnualTurnover ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
-                            }`}
-                          />
-                          {plErrors.offsiteAnnualTurnover && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.offsiteAnnualTurnover}</p>}
-                        </div>
-
-                        {plForm.offsiteGeographicalLimit !== "UAE" && (
-                          <div className="space-y-1.5 md:col-span-2">
-                            <label className="text-[11px] font-extrabold text-slate-700">Annual Turnover Split per Country</label>
-                            <textarea
-                              rows={2}
-                              value={plForm.offsiteTurnoverSplitDetails}
-                              onChange={(e) => setPlForm({ ...plForm, offsiteTurnoverSplitDetails: e.target.value })}
-                              placeholder="e.g. UAE: AED 3,000,000 | Saudi Arabia: AED 1,500,000 | Oman: AED 500,000"
-                              className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
-                                plErrors.offsiteTurnoverSplitDetails ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
-                              }`}
-                            />
-                            {plErrors.offsiteTurnoverSplitDetails && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.offsiteTurnoverSplitDetails}</p>}
-                          </div>
-                        )}
-
-                        <div className="space-y-1.5">
-                          <label className="text-[11px] font-extrabold text-slate-700">Estimated Number of Projects / Contracts</label>
-                          <input
-                            type="number"
-                            min="0"
-                            value={plForm.offsiteEstimatedProjects}
-                            onChange={(e) => setPlForm({ ...plForm, offsiteEstimatedProjects: e.target.value })}
-                            placeholder="e.g. 15"
-                            className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
-                              plErrors.offsiteEstimatedProjects ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
-                            }`}
-                          />
-                          {plErrors.offsiteEstimatedProjects && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.offsiteEstimatedProjects}</p>}
-                        </div>
-
-                        <div className="space-y-1.5">
-                          <label className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1"><Users size={13} className="text-slate-400" /> Total Number of Employees</label>
-                          <input
-                            type="number"
-                            min="1"
-                            value={plForm.offsiteNumberOfEmployees}
-                            onChange={(e) => setPlForm({ ...plForm, offsiteNumberOfEmployees: e.target.value })}
-                            placeholder="e.g. 45"
-                            className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
-                              plErrors.offsiteNumberOfEmployees ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
-                            }`}
-                          />
-                          {plErrors.offsiteNumberOfEmployees && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.offsiteNumberOfEmployees}</p>}
-                        </div>
-
-                        <div className="md:col-span-2 border-t border-slate-200/60 pt-4">
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                            <div className="space-y-0.5">
-                              <label className="text-[11px] font-extrabold text-slate-700">Is any of your off-site work subcontracted?</label>
-                              <p className="text-[10px] text-slate-500">Select yes if you assign works to independent third-party vendors or freelancers.</p>
+                  {plForm.offsiteCoverRequired === "yes" && (
+                    <>
+                      <div className="space-y-6">
+                        {plForm.offsiteEntries.map((entry, idx) => (
+                          <div key={entry.id} className="border border-slate-200 rounded-2xl overflow-hidden bg-white">
+                            <div className="bg-slate-50 px-5 py-3 border-b border-slate-200 flex justify-between items-center">
+                              <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                                <span className="w-5 h-5 flex items-center justify-center rounded-full bg-slate-200 text-slate-700 text-[10px] font-black">{idx + 1}</span>
+                                Off-site Operation Entry
+                              </span>
+                              {plForm.offsiteEntries.length > 1 && (
+                                <button type="button" onClick={() => handlePlRemoveOffsiteEntry(idx)} className="text-slate-400 hover:text-rose-500 flex items-center gap-1 text-[11px] font-bold cursor-pointer">
+                                  <Trash2 size={13} />
+                                  <span>Delete</span>
+                                </button>
+                              )}
                             </div>
-                            <div className="flex gap-4 shrink-0">
-                              <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="pl-subcontracted" checked={plForm.offsiteSubcontractedWork === "no"} onChange={() => setPlForm({ ...plForm, offsiteSubcontractedWork: "no" })} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
-                                <span className="text-xs font-bold text-slate-700">No</span>
-                              </label>
-                              <label className="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="pl-subcontracted" checked={plForm.offsiteSubcontractedWork === "yes"} onChange={() => setPlForm({ ...plForm, offsiteSubcontractedWork: "yes" })} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
-                                <span className="text-xs font-bold text-slate-700">Yes</span>
-                              </label>
-                            </div>
-                          </div>
 
-                          {plForm.offsiteSubcontractedWork === "yes" && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 bg-white p-4 rounded-xl border border-slate-100">
-                              <div className="space-y-1.5">
-                                <label className="text-[10px] font-extrabold text-slate-600">Subcontracted Services (Optional)</label>
-                                <input type="text" value={plForm.offsiteSubcontractedServices} onChange={(e) => setPlForm({ ...plForm, offsiteSubcontractedServices: e.target.value })} placeholder="e.g. Electrical wiring, plumbing, HVAC install" className="w-full bg-slate-50/40 border border-slate-200 py-2 px-3 rounded-lg text-xs font-bold text-slate-800 outline-none focus:border-blue-950" />
+                            <div className="p-5 space-y-5">
+                              <div className="flex gap-3">
+                                <label className={`flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-black cursor-pointer border-2 transition-all ${entry.coverType === "annual" ? "border-blue-900 bg-blue-50/30 text-blue-900" : "border-slate-100 text-slate-500"}`}>
+                                  <input type="radio" name={`pl-covertype-${idx}`} className="hidden" checked={entry.coverType === "annual"} onChange={() => handlePlOffsiteEntryChange(idx, "coverType", "annual")} />
+                                  Annual Cover
+                                </label>
+                                <label className={`flex-1 text-center py-2.5 px-3 rounded-xl text-xs font-black cursor-pointer border-2 transition-all ${entry.coverType === "project" ? "border-blue-900 bg-blue-50/30 text-blue-900" : "border-slate-100 text-slate-500"}`}>
+                                  <input type="radio" name={`pl-covertype-${idx}`} className="hidden" checked={entry.coverType === "project"} onChange={() => handlePlOffsiteEntryChange(idx, "coverType", "project")} />
+                                  Project Specific Cover
+                                </label>
                               </div>
-                              <div className="space-y-1.5">
-                                <label className="text-[10px] font-extrabold text-slate-600">% of Subcontracted Work on Turnover (Optional)</label>
-                                <input type="number" min="0" max="100" value={plForm.offsiteSubcontractedPercentage} onChange={(e) => setPlForm({ ...plForm, offsiteSubcontractedPercentage: e.target.value })} placeholder="e.g. 15" className="w-full bg-slate-50/40 border border-slate-200 py-2 px-3 rounded-lg text-xs font-bold text-slate-800 outline-none focus:border-blue-950" />
-                              </div>
+
+                              {entry.coverType === "project" ? (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                  <div className="md:col-span-2 space-y-1.5">
+                                    <label className="text-[11px] font-extrabold text-slate-700">Title of Contract</label>
+                                    <input
+                                      type="text"
+                                      value={entry.projectTitle}
+                                      onChange={(e) => handlePlOffsiteEntryChange(idx, "projectTitle", e.target.value)}
+                                      placeholder="e.g. Warehouse Fit-Out Contract"
+                                      className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                        plErrors[`offsite_${idx}_ptitle`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                                      }`}
+                                    />
+                                    {plErrors[`offsite_${idx}_ptitle`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors[`offsite_${idx}_ptitle`]}</p>}
+                                  </div>
+
+                                  <div className="space-y-1.5">
+                                    <label className="text-[11px] font-extrabold text-slate-700">Total Contract Value (Optional)</label>
+                                    <input
+                                      type="text"
+                                      value={entry.projectContractValue}
+                                      onChange={(e) => handlePlOffsiteEntryMoneyChange(idx, "projectContractValue", e.target.value)}
+                                      placeholder="e.g. 5,000,000"
+                                      className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950"
+                                    />
+                                  </div>
+
+                                  <div className="space-y-1.5">
+                                    <label className="text-[11px] font-extrabold text-slate-700">Third Party Liability Limit (AED)</label>
+                                    <input
+                                      type="text"
+                                      value={entry.projectLiabilityLimit}
+                                      onChange={(e) => handlePlOffsiteEntryMoneyChange(idx, "projectLiabilityLimit", e.target.value)}
+                                      placeholder="e.g. 2,000,000"
+                                      className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                        plErrors[`offsite_${idx}_pliab`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                                      }`}
+                                    />
+                                    {plErrors[`offsite_${idx}_pliab`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors[`offsite_${idx}_pliab`]}</p>}
+                                  </div>
+
+                                  <div className="space-y-1.5">
+                                    <label className="text-[11px] font-extrabold text-slate-700">Project Duration (Optional)</label>
+                                    <select
+                                      value={entry.projectDuration}
+                                      onChange={(e) => handlePlOffsiteEntryChange(idx, "projectDuration", e.target.value)}
+                                      className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950 cursor-pointer"
+                                    >
+                                      <option value="">Select duration...</option>
+                                      {PL_PROJECT_DURATION_OPTIONS.map((d) => (
+                                        <option key={d} value={d}>{d}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+
+                                  <div className="space-y-1.5">
+                                    <label className="text-[11px] font-extrabold text-slate-700">Project Location</label>
+                                    <input
+                                      type="text"
+                                      value={entry.projectLocation}
+                                      onChange={(e) => handlePlOffsiteEntryChange(idx, "projectLocation", e.target.value)}
+                                      placeholder="e.g. Dubai South, UAE"
+                                      className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                        plErrors[`offsite_${idx}_ploc`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                                      }`}
+                                    />
+                                    {plErrors[`offsite_${idx}_ploc`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors[`offsite_${idx}_ploc`]}</p>}
+                                  </div>
+
+                                  <div className="md:col-span-2 space-y-1.5">
+                                    <label className="text-[11px] font-extrabold text-slate-700">Exact Scope of Work (Full Details)</label>
+                                    <textarea
+                                      rows={2}
+                                      value={entry.projectScopeOfWork}
+                                      onChange={(e) => handlePlOffsiteEntryChange(idx, "projectScopeOfWork", e.target.value)}
+                                      placeholder="Provide detailed description of all activities to be carried out."
+                                      className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                        plErrors[`offsite_${idx}_pscope`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                                      }`}
+                                    />
+                                    {plErrors[`offsite_${idx}_pscope`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors[`offsite_${idx}_pscope`]}</p>}
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                  <div className="md:col-span-2 space-y-1.5">
+                                    <label className="text-[11px] font-extrabold text-slate-700">Off-site Operations Location</label>
+                                    <input
+                                      type="text"
+                                      value={entry.location}
+                                      onChange={(e) => handlePlOffsiteEntryChange(idx, "location", e.target.value)}
+                                      placeholder="e.g. Client sites across UAE, or dynamic projects"
+                                      className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                        plErrors[`offsite_${idx}_loc`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                                      }`}
+                                    />
+                                    {plErrors[`offsite_${idx}_loc`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors[`offsite_${idx}_loc`]}</p>}
+                                  </div>
+
+                                  <div className="space-y-1.5">
+                                    <label className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1"><DollarSign size={13} className="text-slate-400" /> Off-site Location Limit of Indemnity (AED)</label>
+                                    <input
+                                      type="text"
+                                      value={entry.limitOfIndemnity}
+                                      onChange={(e) => handlePlOffsiteEntryMoneyChange(idx, "limitOfIndemnity", e.target.value)}
+                                      placeholder="e.g. 10,000,000"
+                                      className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                        plErrors[`offsite_${idx}_limit`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                                      }`}
+                                    />
+                                    {plErrors[`offsite_${idx}_limit`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors[`offsite_${idx}_limit`]}</p>}
+                                  </div>
+
+                                  <div className="space-y-1.5">
+                                    <label className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1"><Map size={13} className="text-slate-400" /> Geographical Limit Required</label>
+                                    <select
+                                      value={entry.geographicalLimit}
+                                      onChange={(e) => handlePlOffsiteEntryChange(idx, "geographicalLimit", e.target.value)}
+                                      className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950 cursor-pointer"
+                                    >
+                                      {PL_GEOGRAPHICAL_LIMITS.map((limit) => (
+                                        <option key={limit} value={limit}>{limit}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+
+                                  <div className="space-y-1.5">
+                                    <label className="text-[11px] font-extrabold text-slate-700">Employees Doing Manual Work?</label>
+                                    <div className="flex gap-4 py-1">
+                                      <label className="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name={`pl-manual-${idx}`} checked={entry.manualWorkEmployees === "no"} onChange={() => handlePlOffsiteEntryChange(idx, "manualWorkEmployees", "no")} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
+                                        <span className="text-xs font-bold text-slate-700">No</span>
+                                      </label>
+                                      <label className="flex items-center gap-2 cursor-pointer">
+                                        <input type="radio" name={`pl-manual-${idx}`} checked={entry.manualWorkEmployees === "yes"} onChange={() => handlePlOffsiteEntryChange(idx, "manualWorkEmployees", "yes")} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
+                                        <span className="text-xs font-bold text-slate-700">Yes</span>
+                                      </label>
+                                    </div>
+                                    {entry.manualWorkEmployees === "yes" && (
+                                      <p className="text-[10px] text-blue-900 font-bold">Note: Premium will adjust for manual risk exposures such as heights, tools, or machinery.</p>
+                                    )}
+                                  </div>
+
+                                  <div className="md:col-span-2">
+                                    {entry.geographicalLimit === "UAE" && (
+                                      <div className="space-y-1.5 md:w-1/2">
+                                        <label className="text-[11px] font-extrabold text-slate-700">Annual Turnover (AED)</label>
+                                        <input
+                                          type="text"
+                                          value={entry.annualTurnover}
+                                          onChange={(e) => handlePlOffsiteEntryMoneyChange(idx, "annualTurnover", e.target.value)}
+                                          placeholder="Estimated yearly sales / revenue"
+                                          className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                            plErrors[`offsite_${idx}_turnover`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                                          }`}
+                                        />
+                                        {plErrors[`offsite_${idx}_turnover`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors[`offsite_${idx}_turnover`]}</p>}
+                                      </div>
+                                    )}
+                                    {entry.geographicalLimit === "GCC" && (
+                                      <div className="space-y-1.5">
+                                        <label className="text-[11px] font-extrabold text-slate-700">Select GCC Countries</label>
+                                        {plErrors[`offsite_${idx}_gcc_countries`] && <p className="text-[10px] text-rose-500 font-bold">{plErrors[`offsite_${idx}_gcc_countries`]}</p>}
+                                        {renderPlCountryTurnoverBlock(entry, idx, "gccCountries", "gccTurnoverByCountry", PL_GCC_COUNTRIES, `offsite_${idx}_gccturnover`)}
+                                      </div>
+                                    )}
+                                    {entry.geographicalLimit === "Worldwide including US & Canada" && (
+                                      <div className="space-y-1.5">
+                                        <label className="text-[11px] font-extrabold text-slate-700">Select Countries</label>
+                                        {plErrors[`offsite_${idx}_usca_countries`] && <p className="text-[10px] text-rose-500 font-bold">{plErrors[`offsite_${idx}_usca_countries`]}</p>}
+                                        {renderPlCountryTurnoverBlock(entry, idx, "usCanadaCountries", "usCanadaTurnoverByCountry", PL_US_CANADA_COUNTRIES, `offsite_${idx}_uscaturnover`)}
+                                      </div>
+                                    )}
+                                    {entry.geographicalLimit === "Worldwide excluding US & Canada" && (
+                                      <div className="space-y-1.5">
+                                        <label className="text-[11px] font-extrabold text-slate-700">Annual Turnover Split per Country (Optional)</label>
+                                        <textarea
+                                          rows={2}
+                                          value={entry.turnoverSplitDetails}
+                                          onChange={(e) => handlePlOffsiteEntryChange(idx, "turnoverSplitDetails", e.target.value)}
+                                          placeholder="e.g. UAE: AED 3,000,000 | Egypt: AED 1,500,000 | India: AED 500,000"
+                                          className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950"
+                                        />
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  <div className="space-y-1.5">
+                                    <label className="text-[11px] font-extrabold text-slate-700">Estimated Number of Projects / Contracts</label>
+                                    <input
+                                      type="number"
+                                      min="0"
+                                      value={entry.estimatedProjects}
+                                      onChange={(e) => handlePlOffsiteEntryChange(idx, "estimatedProjects", e.target.value)}
+                                      placeholder="e.g. 15"
+                                      className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                        plErrors[`offsite_${idx}_projects`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                                      }`}
+                                    />
+                                    {plErrors[`offsite_${idx}_projects`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors[`offsite_${idx}_projects`]}</p>}
+                                  </div>
+
+                                  <div className="space-y-1.5">
+                                    <label className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1"><Users size={13} className="text-slate-400" /> Total Number of Employees</label>
+                                    <input
+                                      type="number"
+                                      min="1"
+                                      value={entry.numberOfEmployees}
+                                      onChange={(e) => handlePlOffsiteEntryChange(idx, "numberOfEmployees", e.target.value)}
+                                      placeholder="e.g. 45"
+                                      className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                        plErrors[`offsite_${idx}_employees`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                                      }`}
+                                    />
+                                    {plErrors[`offsite_${idx}_employees`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors[`offsite_${idx}_employees`]}</p>}
+                                  </div>
+
+                                  <div className="md:col-span-2 border-t border-slate-200/60 pt-4">
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                      <div className="space-y-0.5">
+                                        <label className="text-[11px] font-extrabold text-slate-700">Is any of this off-site work subcontracted?</label>
+                                        <p className="text-[10px] text-slate-500">Select yes if you assign works to independent third-party vendors or freelancers.</p>
+                                      </div>
+                                      <div className="flex gap-4 shrink-0">
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                          <input type="radio" name={`pl-subcontracted-${idx}`} checked={entry.subcontractedWork === "no"} onChange={() => handlePlOffsiteEntryChange(idx, "subcontractedWork", "no")} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
+                                          <span className="text-xs font-bold text-slate-700">No</span>
+                                        </label>
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                          <input type="radio" name={`pl-subcontracted-${idx}`} checked={entry.subcontractedWork === "yes"} onChange={() => handlePlOffsiteEntryChange(idx, "subcontractedWork", "yes")} className="w-4 h-4 text-blue-900 focus:ring-blue-900 border-slate-300" />
+                                          <span className="text-xs font-bold text-slate-700">Yes</span>
+                                        </label>
+                                      </div>
+                                    </div>
+
+                                    {entry.subcontractedWork === "yes" && (
+                                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                        <div className="space-y-1.5">
+                                          <label className="text-[10px] font-extrabold text-slate-600">Subcontracted Services (Optional)</label>
+                                          <input type="text" value={entry.subcontractedServices} onChange={(e) => handlePlOffsiteEntryChange(idx, "subcontractedServices", e.target.value)} placeholder="e.g. Electrical wiring, plumbing, HVAC install" className="w-full bg-white border border-slate-200 py-2 px-3 rounded-lg text-xs font-bold text-slate-800 outline-none focus:border-blue-950" />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                          <label className="text-[10px] font-extrabold text-slate-600">% of Subcontracted Work on Turnover (Optional)</label>
+                                          <input type="number" min="0" max="100" value={entry.subcontractedPercentage} onChange={(e) => handlePlOffsiteEntryChange(idx, "subcontractedPercentage", e.target.value)} placeholder="e.g. 15" className="w-full bg-white border border-slate-200 py-2 px-3 rounded-lg text-xs font-bold text-slate-800 outline-none focus:border-blue-950" />
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              )}
                             </div>
-                          )}
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="flex justify-center">
+                        <button
+                          type="button"
+                          onClick={handlePlAddOffsiteEntry}
+                          className="flex items-center gap-2 text-xs text-blue-900 font-black px-4 py-2 border border-dashed border-blue-200 rounded-xl hover:border-blue-900 hover:bg-blue-50/40 transition-all cursor-pointer"
+                        >
+                          <Plus size={15} />
+                          Add Another Off-site Operation
+                        </button>
+                      </div>
+
+                      <div className="space-y-4 pt-4 border-t border-slate-100">
+                        <div>
+                          <h3 className="text-xs font-black text-blue-950 uppercase tracking-widest">Liability Extensions Required</h3>
+                          <p className="text-[11px] text-slate-500 mt-0.5">Select additional coverage extensions for specialized assets or principal protection.</p>
+                        </div>
+
+                        <div className="grid grid-cols-1 gap-3">
+                          {[
+                            { key: "extPropertyBeingWorkedUpon", title: "A. Property being worked upon / Contract works and materials", desc: "Covers liability for physical damage caused directly to third-party contract materials or structural projects on which your employees are actively performing labor." },
+                            { key: "extPropertyUnderCareCustodyControl", title: "B. Property under care, custody and control", desc: "Extends coverage to physical damage or loss occurring to third-party assets left directly under your custody or supervision for maintenance, holding, or storage." },
+                            { key: "extPrincipalsExistingProperty", title: "C. Principal's existing and surrounding property", desc: "Protects against accidental damages to preexisting structural facilities or adjacent lands owned by the client/principal on whose site your company is working." }
+                          ].map((ext) => {
+                            const checked = (plForm as any)[ext.key] as boolean;
+                            return (
+                              <div
+                                key={ext.key}
+                                onClick={() => setPlForm({ ...plForm, [ext.key]: !checked })}
+                                className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex items-start gap-3 select-none ${
+                                  checked ? "border-blue-900 bg-blue-50/30" : "border-slate-100 bg-white hover:border-slate-200"
+                                }`}
+                              >
+                                <div className={`w-5 h-5 mt-0.5 rounded flex items-center justify-center border shrink-0 ${checked ? "border-blue-900 bg-blue-900 text-white" : "border-slate-300 bg-white"}`}>
+                                  {checked && <Check size={13} className="stroke-[3]" />}
+                                </div>
+                                <div>
+                                  <span className="text-xs font-black text-slate-800 block">{ext.title}</span>
+                                  <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">{ext.desc}</p>
+                                </div>
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
-                    )}
-                  </div>
-
-                  <div className="space-y-4 pt-4 border-t border-slate-100">
-                    <div>
-                      <h3 className="text-xs font-black text-blue-950 uppercase tracking-widest">Liability Extensions Required</h3>
-                      <p className="text-[11px] text-slate-500 mt-0.5">Select additional coverage extensions for specialized assets or principal protection.</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-3">
-                      {[
-                        { key: "extPropertyBeingWorkedUpon", title: "A. Property being worked upon / Contract works and materials", desc: "Covers liability for physical damage caused directly to third-party contract materials or structural projects on which your employees are actively performing labor." },
-                        { key: "extPropertyUnderCareCustodyControl", title: "B. Property under care, custody and control", desc: "Extends coverage to physical damage or loss occurring to third-party assets left directly under your custody or supervision for maintenance, holding, or storage." },
-                        { key: "extPrincipalsExistingProperty", title: "C. Principal's existing and surrounding property", desc: "Protects against accidental damages to preexisting structural facilities or adjacent lands owned by the client/principal on whose site your company is working." }
-                      ].map((ext) => {
-                        const checked = (plForm as any)[ext.key] as boolean;
-                        return (
-                          <div
-                            key={ext.key}
-                            onClick={() => setPlForm({ ...plForm, [ext.key]: !checked })}
-                            className={`p-4 rounded-xl border-2 transition-all cursor-pointer flex items-start gap-3 select-none ${
-                              checked ? "border-blue-900 bg-blue-50/30" : "border-slate-100 bg-white hover:border-slate-200"
-                            }`}
-                          >
-                            <div className={`w-5 h-5 mt-0.5 rounded flex items-center justify-center border shrink-0 ${checked ? "border-blue-900 bg-blue-900 text-white" : "border-slate-300 bg-white"}`}>
-                              {checked && <Check size={13} className="stroke-[3]" />}
-                            </div>
-                            <div>
-                              <span className="text-xs font-black text-slate-800 block">{ext.title}</span>
-                              <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">{ext.desc}</p>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                    </>
+                  )}
                 </div>
               )}
 
@@ -1921,6 +2264,7 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                     <div className="border border-slate-200 rounded-2xl p-4 space-y-1.5">
                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Company & Contact</p>
                       <p className="font-bold text-slate-800">{plForm.companyName || "--"} &middot; {plForm.tradeLicenseNumber || "--"}</p>
+                      <p className="text-slate-600">{plForm.businessActivity || "No business activity selected"}</p>
                       <p className="text-slate-600">{plForm.contactPerson || "--"} &middot; {plForm.contactEmail || "--"} &middot; {plForm.contactPhone || "--"}</p>
                     </div>
 
@@ -1934,12 +2278,25 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                       ))}
                     </div>
 
-                    <div className="border border-slate-200 rounded-2xl p-4 space-y-1">
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Off-site Operations</p>
+                    <div className="border border-slate-200 rounded-2xl p-4 space-y-2">
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Off-site Operations ({plForm.offsiteEntries.length})</p>
                       {plForm.offsiteCoverRequired === "no" ? (
                         <p className="text-slate-500 italic">No offsite operations cover requested.</p>
                       ) : (
-                        <p className="text-slate-600">{plForm.offsiteLocation || "--"} &middot; AED {plForm.offsiteLimitOfIndemnity || "--"} &middot; {plForm.offsiteGeographicalLimit}</p>
+                        plForm.offsiteEntries.map((entry, idx) => (
+                          <div key={entry.id} className="flex justify-between gap-4 border-b border-slate-100 last:border-0 pb-1.5 last:pb-0">
+                            {entry.coverType === "project" ? (
+                              <span className="text-slate-600">#{idx + 1} {entry.projectTitle || "No title entered"} &middot; Project Specific &middot; {entry.projectLocation || "--"}</span>
+                            ) : (
+                              <span className="text-slate-600">#{idx + 1} {entry.location || "No location entered"} &middot; Annual Cover &middot; {entry.geographicalLimit}</span>
+                            )}
+                            <span className="font-black text-blue-900 shrink-0">
+                              {entry.coverType === "project"
+                                ? (entry.projectLiabilityLimit ? `AED ${entry.projectLiabilityLimit}` : "--")
+                                : (entry.limitOfIndemnity ? `AED ${entry.limitOfIndemnity}` : "--")}
+                            </span>
+                          </div>
+                        ))
                       )}
                     </div>
 
