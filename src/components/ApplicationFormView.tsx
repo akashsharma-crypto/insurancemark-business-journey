@@ -313,6 +313,53 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
     }
   };
 
+  // Field-level validation mirroring the reference Public Liability flow's dynamic
+  // required/optional rules (fields only become required once a prior answer triggers them).
+  const plErrors = React.useMemo(() => {
+    const errs: Record<string, string> = {};
+
+    if (!plForm.companyName.trim()) errs.companyName = "Company Name is required.";
+    if (!plForm.tradeLicenseNumber.trim()) errs.tradeLicenseNumber = "Trade License Number is required.";
+    if (!plForm.contactPerson.trim()) errs.contactPerson = "Primary Contact Person is required.";
+    if (!plForm.contactEmail.trim()) {
+      errs.contactEmail = "Contact Email is required.";
+    } else if (!/\S+@\S+\.\S+/.test(plForm.contactEmail)) {
+      errs.contactEmail = "Contact Email format is invalid.";
+    }
+    if (!plForm.contactPhone.trim()) errs.contactPhone = "Contact Phone is required.";
+    if (!plForm.businessDescription.trim()) errs.businessDescription = "Business Description is required.";
+
+    plForm.locations.forEach((loc, idx) => {
+      if (!loc.address.trim()) errs[`location_${idx}_address`] = `Address is required for Location #${idx + 1}.`;
+      if (!loc.limitOfIndemnity.trim()) errs[`location_${idx}_limitOfIndemnity`] = `Limit of Indemnity is required for Location #${idx + 1}.`;
+      if (loc.occupancy === "Others" && !loc.occupancyOtherDetails.trim()) {
+        errs[`location_${idx}_occupancyOtherDetails`] = `Please specify 'Others' occupancy details for Location #${idx + 1}.`;
+      }
+      if (loc.claimsHistoryLast5Years === "yes" && !loc.claimsDetails.trim()) {
+        errs[`location_${idx}_claimsDetails`] = `Claims details must be specified for Location #${idx + 1} since Claims History is 'Yes'.`;
+      }
+    });
+
+    if (plForm.offsiteCoverRequired === "yes") {
+      if (!plForm.offsiteLocation.trim()) errs.offsiteLocation = "Off-site Location description is required.";
+      if (!plForm.offsiteLimitOfIndemnity.trim()) errs.offsiteLimitOfIndemnity = "Overall Off-site Limit of Indemnity is required.";
+      if (!plForm.offsiteAnnualTurnover.trim()) errs.offsiteAnnualTurnover = "Annual Turnover is required for off-site cover.";
+      if (plForm.offsiteGeographicalLimit !== "UAE" && !plForm.offsiteTurnoverSplitDetails.trim()) {
+        errs.offsiteTurnoverSplitDetails = "Turnover country split is required for international geographical coverage.";
+      }
+      if (!plForm.offsiteEstimatedProjects || parseInt(plForm.offsiteEstimatedProjects, 10) < 0) {
+        errs.offsiteEstimatedProjects = "Estimated projects count is required (minimum 0).";
+      }
+      if (!plForm.offsiteNumberOfEmployees || parseInt(plForm.offsiteNumberOfEmployees, 10) < 1) {
+        errs.offsiteNumberOfEmployees = "Number of employees is required (minimum 1).";
+      }
+    }
+
+    if (!plForm.tradeLicenseFile) errs.tradeLicenseFile = "Uploading a Trade License copy is mandatory to complete the proposal.";
+
+    return errs;
+  }, [plForm]);
+
   // Form State 3: Directors & Officers (D&O) Liability Form
   const [doForm, setDoForm] = useState(() => {
     return {
@@ -1265,9 +1312,12 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                         className={`w-full py-3 px-4 rounded-xl text-xs font-bold outline-none transition-all ${
                           isFieldAutoFilled("companyName")
                             ? "bg-green-50/20 border-2 border-green-300 text-slate-800"
+                            : plErrors.companyName
+                            ? "bg-white border-2 border-rose-300 text-slate-800 focus:border-rose-500"
                             : "bg-white border border-slate-200 text-slate-800 focus:border-blue-950"
                         }`}
                       />
+                      {plErrors.companyName && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.companyName}</p>}
                     </div>
 
                     <div className="space-y-1.5">
@@ -1277,8 +1327,11 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                         value={plForm.tradeLicenseNumber}
                         onChange={(e) => setPlForm({ ...plForm, tradeLicenseNumber: e.target.value })}
                         placeholder="e.g. TL-123456-D"
-                        className="w-full bg-white border border-slate-200 py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950"
+                        className={`w-full py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                          plErrors.tradeLicenseNumber ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                        }`}
                       />
+                      {plErrors.tradeLicenseNumber && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.tradeLicenseNumber}</p>}
                     </div>
 
                     <div className="space-y-1.5">
@@ -1288,8 +1341,11 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                         value={plForm.contactPerson}
                         onChange={(e) => setPlForm({ ...plForm, contactPerson: e.target.value })}
                         placeholder="e.g. Sarah Connor"
-                        className="w-full bg-white border border-slate-200 py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950"
+                        className={`w-full py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                          plErrors.contactPerson ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                        }`}
                       />
+                      {plErrors.contactPerson && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.contactPerson}</p>}
                     </div>
 
                     <div className="space-y-1.5">
@@ -1299,8 +1355,11 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                         value={plForm.contactEmail}
                         onChange={(e) => setPlForm({ ...plForm, contactEmail: e.target.value })}
                         placeholder="e.g. contact@acmegulf.ae"
-                        className="w-full bg-white border border-slate-200 py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950"
+                        className={`w-full py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                          plErrors.contactEmail ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                        }`}
                       />
+                      {plErrors.contactEmail && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.contactEmail}</p>}
                     </div>
 
                     <div className="space-y-1.5">
@@ -1310,8 +1369,11 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                         value={plForm.contactPhone}
                         onChange={(e) => setPlForm({ ...plForm, contactPhone: e.target.value })}
                         placeholder="e.g. +971 50 123 4567"
-                        className="w-full bg-white border border-slate-200 py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950"
+                        className={`w-full py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                          plErrors.contactPhone ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                        }`}
                       />
+                      {plErrors.contactPhone && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.contactPhone}</p>}
                     </div>
 
                     <div className="space-y-1.5 sm:col-span-2">
@@ -1327,9 +1389,12 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                         className={`w-full py-3 px-4 rounded-xl text-xs font-bold outline-none transition-all ${
                           isFieldAutoFilled("operationsDescription")
                             ? "bg-green-50/20 border-2 border-green-300 text-slate-800"
+                            : plErrors.businessDescription
+                            ? "bg-white border-2 border-rose-300 text-slate-800 focus:border-rose-500"
                             : "bg-white border border-slate-200 text-slate-800 focus:border-blue-950"
                         }`}
                       />
+                      {plErrors.businessDescription && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.businessDescription}</p>}
                       <p className="text-[10px] text-slate-400">This information assists underwriter verification of classification codes and risks.</p>
                     </div>
                   </div>
@@ -1388,8 +1453,11 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                               value={loc.address}
                               onChange={(e) => handlePlLocationChange(idx, "address", e.target.value)}
                               placeholder="e.g. Unit 401, Level 4, Business Tower, Downtown, Dubai, UAE"
-                              className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950"
+                              className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                plErrors[`location_${idx}_address`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                              }`}
                             />
+                            {plErrors[`location_${idx}_address`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors[`location_${idx}_address`]}</p>}
                           </div>
 
                           <div className="space-y-1.5">
@@ -1405,8 +1473,11 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                                 handlePlLocationChange(idx, "limitOfIndemnity", formatted);
                               }}
                               placeholder="e.g. 5,000,000"
-                              className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950"
+                              className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                plErrors[`location_${idx}_limitOfIndemnity`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                              }`}
                             />
+                            {plErrors[`location_${idx}_limitOfIndemnity`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors[`location_${idx}_limitOfIndemnity`]}</p>}
                             <p className="text-[10px] text-slate-400">Typical limits: 1,000,000 to 10,000,000 AED per location</p>
                           </div>
 
@@ -1448,8 +1519,11 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                                 value={loc.occupancyOtherDetails}
                                 onChange={(e) => handlePlLocationChange(idx, "occupancyOtherDetails", e.target.value)}
                                 placeholder="e.g. Art Gallery, Private Gym, Photography Studio"
-                                className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950"
+                                className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                  plErrors[`location_${idx}_occupancyOtherDetails`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                                }`}
                               />
+                              {plErrors[`location_${idx}_occupancyOtherDetails`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors[`location_${idx}_occupancyOtherDetails`]}</p>}
                             </div>
                           )}
 
@@ -1479,8 +1553,11 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                                   value={loc.claimsDetails}
                                   onChange={(e) => handlePlLocationChange(idx, "claimsDetails", e.target.value)}
                                   placeholder="e.g. Jan 2024: Customer slip and fall settled for AED 15,000. Safety grip mats installed immediately after."
-                                  className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950"
+                                  className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                    plErrors[`location_${idx}_claimsDetails`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                                  }`}
                                 />
+                                {plErrors[`location_${idx}_claimsDetails`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors[`location_${idx}_claimsDetails`]}</p>}
                               </div>
                             )}
                           </div>
@@ -1534,7 +1611,16 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 bg-slate-50/40 p-5 rounded-2xl border border-slate-100">
                         <div className="space-y-1.5">
                           <label className="text-[11px] font-extrabold text-slate-700">Off-site Operations Locations</label>
-                          <input type="text" value={plForm.offsiteLocation} onChange={(e) => setPlForm({ ...plForm, offsiteLocation: e.target.value })} placeholder="e.g. Client sites across UAE, or dynamic projects" className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950" />
+                          <input
+                            type="text"
+                            value={plForm.offsiteLocation}
+                            onChange={(e) => setPlForm({ ...plForm, offsiteLocation: e.target.value })}
+                            placeholder="e.g. Client sites across UAE, or dynamic projects"
+                            className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                              plErrors.offsiteLocation ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                            }`}
+                          />
+                          {plErrors.offsiteLocation && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.offsiteLocation}</p>}
                         </div>
 
                         <div className="space-y-1.5">
@@ -1547,8 +1633,11 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                               setPlForm({ ...plForm, offsiteLimitOfIndemnity: clean ? Number(clean).toLocaleString("en-US") : "" });
                             }}
                             placeholder="e.g. 10,000,000"
-                            className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950"
+                            className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                              plErrors.offsiteLimitOfIndemnity ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                            }`}
                           />
+                          {plErrors.offsiteLimitOfIndemnity && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.offsiteLimitOfIndemnity}</p>}
                         </div>
 
                         <div className="space-y-1.5">
@@ -1587,25 +1676,57 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                               setPlForm({ ...plForm, offsiteAnnualTurnover: clean ? Number(clean).toLocaleString("en-US") : "" });
                             }}
                             placeholder="Estimated yearly sales / revenue"
-                            className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950"
+                            className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                              plErrors.offsiteAnnualTurnover ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                            }`}
                           />
+                          {plErrors.offsiteAnnualTurnover && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.offsiteAnnualTurnover}</p>}
                         </div>
 
                         {plForm.offsiteGeographicalLimit !== "UAE" && (
                           <div className="space-y-1.5 md:col-span-2">
                             <label className="text-[11px] font-extrabold text-slate-700">Annual Turnover Split per Country</label>
-                            <textarea rows={2} value={plForm.offsiteTurnoverSplitDetails} onChange={(e) => setPlForm({ ...plForm, offsiteTurnoverSplitDetails: e.target.value })} placeholder="e.g. UAE: AED 3,000,000 | Saudi Arabia: AED 1,500,000 | Oman: AED 500,000" className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950" />
+                            <textarea
+                              rows={2}
+                              value={plForm.offsiteTurnoverSplitDetails}
+                              onChange={(e) => setPlForm({ ...plForm, offsiteTurnoverSplitDetails: e.target.value })}
+                              placeholder="e.g. UAE: AED 3,000,000 | Saudi Arabia: AED 1,500,000 | Oman: AED 500,000"
+                              className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                                plErrors.offsiteTurnoverSplitDetails ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                              }`}
+                            />
+                            {plErrors.offsiteTurnoverSplitDetails && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.offsiteTurnoverSplitDetails}</p>}
                           </div>
                         )}
 
                         <div className="space-y-1.5">
                           <label className="text-[11px] font-extrabold text-slate-700">Estimated Number of Projects / Contracts</label>
-                          <input type="number" min="0" value={plForm.offsiteEstimatedProjects} onChange={(e) => setPlForm({ ...plForm, offsiteEstimatedProjects: e.target.value })} placeholder="e.g. 15" className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950" />
+                          <input
+                            type="number"
+                            min="0"
+                            value={plForm.offsiteEstimatedProjects}
+                            onChange={(e) => setPlForm({ ...plForm, offsiteEstimatedProjects: e.target.value })}
+                            placeholder="e.g. 15"
+                            className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                              plErrors.offsiteEstimatedProjects ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                            }`}
+                          />
+                          {plErrors.offsiteEstimatedProjects && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.offsiteEstimatedProjects}</p>}
                         </div>
 
                         <div className="space-y-1.5">
                           <label className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1"><Users size={13} className="text-slate-400" /> Total Number of Employees</label>
-                          <input type="number" min="1" value={plForm.offsiteNumberOfEmployees} onChange={(e) => setPlForm({ ...plForm, offsiteNumberOfEmployees: e.target.value })} placeholder="e.g. 45" className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950" />
+                          <input
+                            type="number"
+                            min="1"
+                            value={plForm.offsiteNumberOfEmployees}
+                            onChange={(e) => setPlForm({ ...plForm, offsiteNumberOfEmployees: e.target.value })}
+                            placeholder="e.g. 45"
+                            className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                              plErrors.offsiteNumberOfEmployees ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                            }`}
+                          />
+                          {plErrors.offsiteNumberOfEmployees && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.offsiteNumberOfEmployees}</p>}
                         </div>
 
                         <div className="md:col-span-2 border-t border-slate-200/60 pt-4">
@@ -1700,7 +1821,11 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                       <div
                         onClick={() => handlePlSimUpload("license")}
                         className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center min-h-[140px] ${
-                          plForm.tradeLicenseFile ? "border-green-300 bg-green-50/10" : "border-slate-200 hover:border-blue-900 hover:bg-slate-50/50"
+                          plForm.tradeLicenseFile
+                            ? "border-green-300 bg-green-50/10"
+                            : plErrors.tradeLicenseFile
+                            ? "border-rose-300 bg-rose-50/10 hover:border-rose-400"
+                            : "border-slate-200 hover:border-blue-900 hover:bg-slate-50/50"
                         }`}
                       >
                         {plForm.tradeLicenseFile ? (
@@ -1719,6 +1844,7 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                           </div>
                         )}
                       </div>
+                      {plErrors.tradeLicenseFile && <p className="text-[10px] text-rose-500 font-bold mt-1">{plErrors.tradeLicenseFile}</p>}
                     </div>
 
                     <div className="space-y-2">
@@ -1759,6 +1885,28 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
               {activeTab === 5 && (
                 <div className="space-y-6 animate-in fade-in duration-150">
                   <h3 className="text-xs font-black text-blue-950 uppercase tracking-widest border-b pb-1">Review & Sign</h3>
+
+                  {Object.keys(plErrors).length > 0 ? (
+                    <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-900 space-y-2">
+                      <div className="flex gap-2 items-center">
+                        <AlertCircle size={16} className="text-rose-600 shrink-0" />
+                        <span className="font-black text-xs">Please correct validation errors before submitting:</span>
+                      </div>
+                      <ul className="list-disc pl-5 text-[11px] space-y-1 text-rose-700 font-bold">
+                        {Object.entries(plErrors).map(([key, msg]) => (
+                          <li key={key}>{msg}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <div className="p-4 bg-green-50 border border-green-200 rounded-xl text-green-900 flex gap-3 items-center">
+                      <CheckCircle size={18} className="text-green-600 shrink-0" />
+                      <div>
+                        <span className="font-black text-xs block">Validation Passed Successfully</span>
+                        <span className="text-[11px] text-green-700">All mandatory fields are filled out and meet policy criteria.</span>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="space-y-5 text-xs">
                     <div className="border border-slate-200 rounded-2xl p-4 space-y-1.5">
@@ -1856,9 +2004,9 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                 ) : (
                   <button
                     type="submit"
-                    disabled={submitting || !plForm.agreedToDeclaration}
+                    disabled={submitting || !plForm.agreedToDeclaration || Object.keys(plErrors).length > 0}
                     className={`font-black text-xs py-3.5 px-8 rounded-xl flex items-center gap-1.5 shadow-md ${
-                      !plForm.agreedToDeclaration || submitting
+                      !plForm.agreedToDeclaration || submitting || Object.keys(plErrors).length > 0
                         ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
                         : "bg-yellow-400 hover:bg-yellow-500 text-blue-950 shadow-yellow-400/10 cursor-pointer"
                     }`}
