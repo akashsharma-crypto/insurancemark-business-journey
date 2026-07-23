@@ -186,16 +186,30 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
     return prods.length === 1 && (prods[0] === InsuranceProduct.PublicLiability || prods[0] === InsuranceProduct.PublicLiabilitySelect);
   })();
 
-  // Determine default form type based on selected products: land the applicant
-  // directly on whichever cover they picked (PL or D&O) instead of always
-  // defaulting to the generic SME package form.
+  // Which selected products map to a dedicated online proposal form. Anything not
+  // listed here has no bespoke form and is handled via manual document upload.
+  const prodsSelected = lead.selectedProducts || [];
+  const hasPLProduct = prodsSelected.includes(InsuranceProduct.PublicLiability) || prodsSelected.includes(InsuranceProduct.PublicLiabilitySelect);
+  const hasDOProduct = prodsSelected.includes(InsuranceProduct.DirectorsOfficers) || prodsSelected.includes(InsuranceProduct.DirectorsOfficersSelect);
+  const hasSMEProduct = prodsSelected.includes(InsuranceProduct.Sme) || prodsSelected.includes(InsuranceProduct.SmePackage) || prodsSelected.includes(InsuranceProduct.BusinessInsurance);
+
+  // The tabs we actually show: only the forms that match the selected covers,
+  // and Manual Document Upload for any selected cover that has no online form.
+  const availableFormTabs = [
+    ...(hasSMEProduct ? [{ id: "SME", label: "SME Package Form" }] : []),
+    ...(hasPLProduct ? [{ id: "PL", label: "Public Liability Form" }] : []),
+    ...(hasDOProduct ? [{ id: "DO", label: "D&O Liability Form" }] : []),
+    { id: "Offline", label: "Manual Document Upload" },
+  ];
+
+  // Land the applicant on whichever cover they picked that has a dedicated form
+  // (PL / D&O / SME). If none of the selected covers has an online form, land on
+  // manual document upload instead of wrongly defaulting to the SME form.
   const [selectedFormType, setSelectedFormType] = useState<"SME" | "PL" | "DO" | "Offline">(() => {
-    const prods = lead.selectedProducts || [];
-    const hasPL = prods.includes(InsuranceProduct.PublicLiability) || prods.includes(InsuranceProduct.PublicLiabilitySelect);
-    const hasDO = prods.includes(InsuranceProduct.DirectorsOfficers) || prods.includes(InsuranceProduct.DirectorsOfficersSelect);
-    if (hasPL) return "PL";
-    if (hasDO) return "DO";
-    return "SME";
+    if (hasPLProduct) return "PL";
+    if (hasDOProduct) return "DO";
+    if (hasSMEProduct) return "SME";
+    return "Offline";
   });
   const [activeTab, setActiveTab] = useState<number>(1);
   // Which accordion section is currently expanded (shared across the rendered form,
@@ -909,15 +923,11 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
           </p>
         </div>
 
-        {/* Form Selector Tabs (Makes all forms available online) */}
-        {!isPlOnlyDirect && (
+        {/* Form Selector Tabs — only the forms that match the selected covers,
+            plus Manual Document Upload for covers without a dedicated form. */}
+        {!isPlOnlyDirect && availableFormTabs.length > 1 && (
           <div className="bg-slate-200/60 p-1.5 rounded-2xl max-w-3xl mx-auto flex flex-wrap gap-1 border border-slate-200">
-            {[
-              { id: "SME", label: "SME Package Form" },
-              { id: "PL", label: "Public Liability Form" },
-              { id: "DO", label: "D&O Liability Form" },
-              { id: "Offline", label: "Manual Document Upload" }
-            ].map((formOpt) => (
+            {availableFormTabs.map((formOpt) => (
               <button
                 key={formOpt.id}
                 type="button"
