@@ -186,31 +186,31 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
     return prods.length === 1 && (prods[0] === InsuranceProduct.PublicLiability || prods[0] === InsuranceProduct.PublicLiabilitySelect);
   })();
 
-  // Which selected products map to a dedicated online proposal form. Anything not
-  // listed here has no bespoke form and is handled via manual document upload.
-  const prodsSelected = lead.selectedProducts || [];
-  const hasPLProduct = prodsSelected.includes(InsuranceProduct.PublicLiability) || prodsSelected.includes(InsuranceProduct.PublicLiabilitySelect);
-  const hasDOProduct = prodsSelected.includes(InsuranceProduct.DirectorsOfficers) || prodsSelected.includes(InsuranceProduct.DirectorsOfficersSelect);
-  const hasSMEProduct = prodsSelected.includes(InsuranceProduct.Sme) || prodsSelected.includes(InsuranceProduct.SmePackage) || prodsSelected.includes(InsuranceProduct.BusinessInsurance);
+  // Every selected cover becomes its own tab. Covers with a dedicated online form
+  // (SME / PL / D&O) render that form; every other cover gets its own manual
+  // document upload window, titled with the product name.
+  const prodsSelected = (lead.selectedProducts && lead.selectedProducts.length > 0)
+    ? lead.selectedProducts
+    : [InsuranceProduct.BusinessInsurance];
 
-  // The tabs we actually show: only the forms that match the selected covers,
-  // and Manual Document Upload for any selected cover that has no online form.
-  const availableFormTabs = [
-    ...(hasSMEProduct ? [{ id: "SME", label: "SME Package Form" }] : []),
-    ...(hasPLProduct ? [{ id: "PL", label: "Public Liability Form" }] : []),
-    ...(hasDOProduct ? [{ id: "DO", label: "D&O Liability Form" }] : []),
-    { id: "Offline", label: "Manual Document Upload" },
-  ];
+  const productFormKind = (p: InsuranceProduct): "SME" | "PL" | "DO" | "UPLOAD" => {
+    if (p === InsuranceProduct.PublicLiability || p === InsuranceProduct.PublicLiabilitySelect) return "PL";
+    if (p === InsuranceProduct.DirectorsOfficers || p === InsuranceProduct.DirectorsOfficersSelect) return "DO";
+    if (p === InsuranceProduct.Sme || p === InsuranceProduct.SmePackage || p === InsuranceProduct.BusinessInsurance) return "SME";
+    return "UPLOAD";
+  };
 
-  // Land the applicant on whichever cover they picked that has a dedicated form
-  // (PL / D&O / SME). If none of the selected covers has an online form, land on
-  // manual document upload instead of wrongly defaulting to the SME form.
-  const [selectedFormType, setSelectedFormType] = useState<"SME" | "PL" | "DO" | "Offline">(() => {
-    if (hasPLProduct) return "PL";
-    if (hasDOProduct) return "DO";
-    if (hasSMEProduct) return "SME";
-    return "Offline";
+  // One tab per selected cover, labelled with the product name.
+  const productTabs = prodsSelected.map((p, i) => ({ idx: i, product: p, kind: productFormKind(p) }));
+
+  // Land on the first cover that has a dedicated online form; otherwise the first cover.
+  const [activeProductIdx, setActiveProductIdx] = useState<number>(() => {
+    const i = prodsSelected.findIndex((p) => productFormKind(p) !== "UPLOAD");
+    return i >= 0 ? i : 0;
   });
+  const activeProduct = prodsSelected[activeProductIdx] ?? prodsSelected[0];
+  const activeKind = productFormKind(activeProduct);
+  const selectedFormType: "SME" | "PL" | "DO" | "Offline" = activeKind === "UPLOAD" ? "Offline" : activeKind;
   const [activeTab, setActiveTab] = useState<number>(1);
   // Which accordion section is currently expanded (shared across the rendered form,
   // since only one form is shown at a time). -1 means all collapsed.
@@ -675,21 +675,22 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
     };
   });
 
-  // Offline upload simulator state
-  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+  // Offline upload simulator state — kept independently per product tab, so each
+  // upload-only cover has its own upload window and file list.
+  const [uploadsByProduct, setUploadsByProduct] = useState<Record<number, string[]>>({});
   const [uploadProgress, setUploadProgress] = useState<number>(0);
-  const [uploading, setUploading] = useState(false);
+  const [uploadingIdx, setUploadingIdx] = useState<number | null>(null);
   const [isFilledFromUpload, setIsFilledFromUpload] = useState(false);
 
-  const handleFileUploadSim = () => {
-    setUploading(true);
+  const handleFileUploadSim = (idx: number) => {
+    setUploadingIdx(idx);
     setUploadProgress(10);
     const interval = setInterval(() => {
       setUploadProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
-          setUploading(false);
-          setUploadedFiles(prevFiles => [...prevFiles, "Completed_Underwriting_Proposal.pdf"]);
+          setUploadingIdx(null);
+          setUploadsByProduct(prevMap => ({ ...prevMap, [idx]: [...(prevMap[idx] || []), "Completed_Underwriting_Proposal.pdf"] }));
           return 100;
         }
         return prev + 30;
@@ -710,7 +711,7 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
       } else if (selectedFormType === "PL") {
         onCompleteFlow("Public Liability Digital Proposal", plForm2);
       } else {
-        onCompleteFlow("Offline Proposal Upload", { uploadedFiles });
+        onCompleteFlow("Offline Proposal Upload", { uploads: uploadsByProduct });
       }
     }, 1200);
   };
@@ -913,36 +914,35 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
         {/* Dynamic Header */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-            {selectedFormType === "SME" && "SME Proposal Form"}
-            {selectedFormType === "PL" && "Public Liability Proposal Form"}
-            {selectedFormType === "DO" && "Directors & Officers (D&O) Proposal Form"}
-            {selectedFormType === "Offline" && "Custom Underwriting Upload"}
+            {activeProduct}
           </h1>
           <p className="text-slate-500 text-sm max-w-2xl mx-auto">
-            Fill out your insurance details online. Available corporate data is auto-filled for your convenience, and any missing values have been left strictly blank for your accurate inputs.
+            {activeKind === "UPLOAD"
+              ? "This cover doesn't have an online form. Download the underwriting pack, complete it, and upload it back below."
+              : "Fill out your insurance details online. Available corporate data is auto-filled for your convenience, and any missing values have been left strictly blank for your accurate inputs."}
           </p>
         </div>
 
-        {/* Form Selector Tabs — only the forms that match the selected covers,
-            plus Manual Document Upload for covers without a dedicated form. */}
-        {!isPlOnlyDirect && availableFormTabs.length > 1 && (
+        {/* Form Selector Tabs — one tab per selected cover, labelled with the
+            product name (covers without an online form open their own upload tab). */}
+        {productTabs.length > 1 && (
           <div className="bg-slate-200/60 p-1.5 rounded-2xl max-w-3xl mx-auto flex flex-wrap gap-1 border border-slate-200">
-            {availableFormTabs.map((formOpt) => (
+            {productTabs.map((tab) => (
               <button
-                key={formOpt.id}
+                key={tab.idx}
                 type="button"
                 onClick={() => {
-                  setSelectedFormType(formOpt.id as any);
+                  setActiveProductIdx(tab.idx);
                   setActiveTab(1);
                   setOpenSection(0);
                 }}
                 className={`flex-1 min-w-[130px] py-2.5 px-3 text-xs font-extrabold rounded-xl text-center transition-all cursor-pointer ${
-                  selectedFormType === formOpt.id
+                  activeProductIdx === tab.idx
                     ? "bg-blue-900 text-white shadow-md shadow-blue-900/10"
                     : "text-slate-600 hover:bg-slate-300/30 hover:text-slate-900"
                 }`}
               >
-                {formOpt.label}
+                {tab.product}
               </button>
             ))}
           </div>
@@ -2840,6 +2840,11 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
           {/* ======================= OFFLINE ATTACHMENT PORTAL ======================= */}
           {selectedFormType === "Offline" && (
             <div className="p-6 sm:p-10 space-y-8 animate-in fade-in duration-200">
+              {/* Product name header for this upload window */}
+              <div className="bg-slate-900 text-white rounded-2xl px-5 py-4 text-center">
+                <p className="text-[10px] font-black uppercase tracking-widest text-yellow-400">Manual Document Upload</p>
+                <h3 className="text-base font-black">{activeProduct}</h3>
+              </div>
               <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-3 text-amber-900">
                 <AlertCircle className="shrink-0 mt-0.5 text-amber-600" size={18} />
                 <div className="space-y-1">
@@ -2870,8 +2875,7 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
               <div className="space-y-2">
                 <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">2. Upload Completed Proposal & Documents</h4>
                 <div
-                  onClick={handleFileUploadSim}
-                  disabled={uploading}
+                  onClick={() => handleFileUploadSim(activeProductIdx)}
                   className="border-2 border-dashed border-slate-200 hover:border-blue-900 rounded-2xl p-8 text-center bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer"
                 >
                   <UploadCloud size={32} className="text-slate-400 mx-auto mb-2" />
@@ -2879,7 +2883,7 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                   <p className="text-[10px] text-slate-400 mt-1">Accepts completed PDF proposal or required trade licenses</p>
                 </div>
 
-                {uploading && (
+                {uploadingIdx === activeProductIdx && (
                   <div className="bg-white border border-slate-100 p-3.5 rounded-xl space-y-2 animate-pulse">
                     <div className="flex items-center justify-between text-[10px] font-bold text-slate-500">
                       <span>Uploading Completed_Underwriting_Proposal.pdf...</span>
@@ -2891,11 +2895,11 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                   </div>
                 )}
 
-                {uploadedFiles.length > 0 && (
+                {(uploadsByProduct[activeProductIdx] || []).length > 0 && (
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <h5 className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Uploaded Documents:</h5>
-                      {uploadedFiles.map((fn, i) => (
+                      {(uploadsByProduct[activeProductIdx] || []).map((fn, i) => (
                         <div key={i} className="bg-slate-50 border border-slate-100 p-3 rounded-xl flex items-center justify-between animate-in slide-in-from-top-2 duration-150">
                           <div className="flex items-center gap-2.5">
                             <CheckCircle className="text-green-500 fill-green-50 shrink-0" size={16} />
@@ -2906,6 +2910,7 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                       ))}
                     </div>
 
+                    {prodsSelected.some((p) => productFormKind(p) !== "UPLOAD") && (
                     <div className="bg-green-50 border border-green-200 p-4 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-4 text-left animate-in fade-in duration-200">
                       <div className="flex items-start gap-3">
                         <Sparkles className="text-green-600 mt-1 shrink-0 animate-pulse" size={18} />
@@ -3025,9 +3030,8 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                           }));
 
                           setIsFilledFromUpload(true);
-                          if (selectedFormType === "Offline") {
-                            setSelectedFormType("SME");
-                          }
+                          const smeIdx = prodsSelected.findIndex((p) => productFormKind(p) === "SME");
+                          if (smeIdx >= 0) setActiveProductIdx(smeIdx);
                           setActiveTab(1);
                           setOpenSection(0);
                         }}
@@ -3037,6 +3041,7 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                         <span>Review Extracted Fields</span>
                       </button>
                     </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -3045,10 +3050,10 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
               <div className="pt-6 border-t border-slate-100">
                 <button
                   type="button"
-                  disabled={uploadedFiles.length === 0 || submitting}
+                  disabled={(uploadsByProduct[activeProductIdx] || []).length === 0 || submitting}
                   onClick={handleSubmit}
                   className={`w-full font-black text-xs py-4 px-8 rounded-2xl flex items-center justify-center gap-2 transition-all ${
-                    uploadedFiles.length === 0 || submitting
+                    (uploadsByProduct[activeProductIdx] || []).length === 0 || submitting
                       ? "bg-slate-100 text-slate-400 cursor-not-allowed"
                       : "bg-yellow-400 hover:bg-yellow-500 text-blue-950 shadow-lg shadow-yellow-400/10 cursor-pointer"
                   }`}
