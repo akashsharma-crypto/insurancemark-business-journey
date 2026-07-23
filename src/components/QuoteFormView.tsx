@@ -374,10 +374,26 @@ export const QuoteFormView: React.FC<QuoteFormViewProps> = ({
 
                 {/* Verification result preview card */}
                 {verifiedRecord && (
-                  <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl mt-2 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <h4 className="text-xs font-black text-slate-900 mb-3">
-                      We found a registration match — use these details?
-                    </h4>
+                  <div className={`p-4 rounded-2xl mt-2 animate-in fade-in slide-in-from-top-2 duration-200 border ${
+                    verifiedRecord.isRealMatch ? "bg-slate-50 border-slate-200" : "bg-amber-50 border-amber-200"
+                  }`}>
+                    {verifiedRecord.isRealMatch ? (
+                      <h4 className="text-xs font-black text-slate-900 mb-3">
+                        We found a registration match — use these details?
+                      </h4>
+                    ) : (
+                      <div className="flex items-start gap-2 mb-3">
+                        <AlertCircle size={14} className="shrink-0 mt-0.5 text-amber-600" />
+                        <div>
+                          <h4 className="text-xs font-black text-amber-900">
+                            Unverified suggestion — please confirm before using
+                          </h4>
+                          <p className="text-[11px] font-semibold text-amber-700 mt-0.5">
+                            {verifiedRecord.verificationNote || "We couldn't confirm this against the official registry. These details were AI-generated and may be inaccurate."}
+                          </p>
+                        </div>
+                      </div>
+                    )}
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-6 text-xs text-slate-600 border-b border-slate-200 pb-3 mb-3">
                       <div>
@@ -417,9 +433,11 @@ export const QuoteFormView: React.FC<QuoteFormViewProps> = ({
                       <button
                         type="button"
                         onClick={handleAcceptPrefill}
-                        className="flex-1 sm:flex-none bg-blue-900 hover:bg-blue-800 text-white py-2 px-5 rounded-xl text-xs font-black cursor-pointer"
+                        className={`flex-1 sm:flex-none py-2 px-5 rounded-xl text-xs font-black cursor-pointer text-white ${
+                          verifiedRecord.isRealMatch ? "bg-blue-900 hover:bg-blue-800" : "bg-amber-600 hover:bg-amber-700"
+                        }`}
                       >
-                        Use These Details
+                        {verifiedRecord.isRealMatch ? "Use These Details" : "Use as Draft (Unverified)"}
                       </button>
                     </div>
                   </div>

@@ -2,13 +2,14 @@ import React from "react";
 import { Check, ChevronRight } from "lucide-react";
 
 interface JourneyStepperProps {
-  currentStep: 1 | 2 | 3;
+  currentStep: 1 | 2 | 3 | 4;
 }
 
 const STEPS = [
-  { step: 1, label: "Company Details" },
-  { step: 2, label: "Application Form" },
-  { step: 3, label: "Application Submitted" },
+  { step: 1, label: "Business & Contact Details" },
+  { step: 2, label: "Coverage Details" },
+  { step: 3, label: "Application Form" },
+  { step: 4, label: "Application Submitted" },
 ];
 
 export const JourneyStepper: React.FC<JourneyStepperProps> = ({ currentStep }) => {

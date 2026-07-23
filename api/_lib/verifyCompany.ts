@@ -6,7 +6,7 @@ let aiClient: GoogleGenAI | null = null;
 function getGeminiClient(): GoogleGenAI | null {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
-    console.warn("WARNING: GEMINI_API_KEY is not defined in the environment. Falling back to structured mock company generator.");
+    console.warn("WARNING: GEMINI_API_KEY is not defined in the environment. Company verification will report 'not verified' when the portal scrape finds no match.");
     return null;
   }
   if (!aiClient) {
@@ -22,7 +22,8 @@ function getGeminiClient(): GoogleGenAI | null {
   return aiClient;
 }
 
-// Structured mock data fallback to ensure seamless local experience if key is not configured
+// Internal known-companies list: instant, accurate matches for companies
+// already verified manually. Grows over time as more companies are confirmed.
 const MOCK_COMPANIES_REGISTRY = [
   {
     companyName: "AFIA INSURANCE BROKERAGE SERVICES (L.L.C.)",
@@ -117,129 +118,68 @@ const MOCK_COMPANIES_REGISTRY = [
   }
 ];
 
-const DUBAI_BUILDINGS = [
-  { name: "Burj Khalifa", area: "Downtown Dubai", authority: "DET Dubai Economy & Tourism" },
-  { name: "Marina Plaza", area: "Dubai Marina", authority: "DET Dubai Economy & Tourism" },
-  { name: "The Opus by Omniyat", area: "Business Bay", authority: "DET Dubai Economy & Tourism" },
-  { name: "Control Tower", area: "Motor City", authority: "DET Dubai Economy & Tourism" },
-  { name: "Al Ghurair Centre", area: "Deira", authority: "DET Dubai Economy & Tourism" },
-  { name: "Festival Tower", area: "Dubai Festival City", authority: "DET Dubai Economy & Tourism" },
-  { name: "Gate Precinct Building 4", area: "DIFC", authority: "DIFC (Dubai International Financial Centre)" },
-  { name: "The Onyx Tower 2", area: "The Greens", authority: "DET Dubai Economy & Tourism" },
-  { name: "Lake Central Tower", area: "Business Bay", authority: "DET Dubai Economy & Tourism" },
-  { name: "Jumeirah Bay X2 Tower", area: "JLT", authority: "DMCC (Dubai Multi Commodities Centre)" }
-];
+// In-memory cache for scraped/AI lookups, so repeat searches for the same
+// name/license don't hit the network again. Cleared on server restart.
+const VERIFICATION_CACHE = new Map<string, { body: any; expiresAt: number }>();
+const CACHE_TTL_MS = 30 * 60 * 1000; // 30 minutes
 
-const TRANSLATION_DICT: Record<string, string> = {
-  al: "ال", ghurair: "غرير", corporate: "المؤسسية", solutions: "حلول", llc: "ذ.م.م",
-  futtaim: "الفطيم", group: "مجموعة", emaar: "إعمار", properties: "العقارية", sharaf: "شرف",
-  dg: "دي جي", aster: "أستر", healthcare: "الرعاية الصحية", noon: "نون", holdings: "القابضة",
-  ltd: "المحدودة", afia: "أفيا", insurance: "التأمين", brokerage: "وساطة", services: "خدمات",
-  trading: "التجارية", general: "العامة", tech: "التقنية", technology: "التكنولوجيا",
-  software: "البرمجيات", development: "التطوير", management: "الإدارة", consultancy: "الاستشارات",
-  consulting: "الاستشارية", global: "العالمية", gulf: "الخليج", dubai: "دبي", emirates: "الإمارات",
-  abu: "أبو", dhabi: "ظبي", retail: "التجزئة", construction: "البناء", engineering: "الهندسة",
-  medical: "الطبية", clinic: "عيادة", logistics: "الخدمات اللوجستية", shipping: "الشحن",
-  warehousing: "التخزين", beauty: "التجميل", salon: "صالون", spa: "سبا", education: "التعليم",
-  training: "التدريب", school: "مدرسة", star: "نجم", bright: "مشرق", future: "مستقبل",
-  creative: "الإبداعية", media: "الإعلام", marketing: "التسويق", digital: "الرقمي",
-  systems: "الأنظمة", ventures: "المشاريع", capital: "رأس المال", investment: "الاستثمار",
-  partners: "الشركاء", industries: "الصناعات", food: "الأغذية", beverage: "المشروبات",
-  restaurant: "مطعم", cafe: "مقهى", catering: "التموين", travel: "السفر", tourism: "السياحة",
-  auto: "السيارات", automotive: "السيارات", facilities: "المرافق", contracts: "العقود",
-  contracting: "المقاولات", civil: "المقاولات المدنية", clean: "التنظيف", security: "الأمن",
-  safety: "السلامة", cargo: "الشحن", land: "البري", sea: "البحري", air: "الجوي",
-  transport: "النقل", commercial: "التجاري", broker: "وسيط", brokers: "الوسطاء",
-  agent: "وكيل", agency: "وكالة"
-};
-
-function translateCompanyToArabic(name: string): string {
-  const words = name.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/);
-  const arabicWords: string[] = [];
-
-  for (const w of words) {
-    if (TRANSLATION_DICT[w]) {
-      arabicWords.push(TRANSLATION_DICT[w]);
-    } else if (w.length > 1) {
-      const transliterated = w
-        .replace(/ph/g, "ف").replace(/th/g, "ث").replace(/sh/g, "ش").replace(/kh/g, "خ")
-        .replace(/ch/g, "ش").replace(/gh/g, "غ").replace(/a/g, "ا").replace(/b/g, "ب")
-        .replace(/c/g, "ك").replace(/d/g, "د").replace(/e/g, "ي").replace(/f/g, "ف")
-        .replace(/g/g, "ج").replace(/h/g, "ه").replace(/i/g, "ي").replace(/j/g, "ج")
-        .replace(/k/g, "ك").replace(/l/g, "ل").replace(/m/g, "م").replace(/n/g, "ن")
-        .replace(/o/g, "و").replace(/p/g, "ب").replace(/q/g, "ق").replace(/r/g, "ر")
-        .replace(/s/g, "س").replace(/t/g, "ت").replace(/u/g, "و").replace(/v/g, "ف")
-        .replace(/w/g, "و").replace(/x/g, "كس").replace(/y/g, "ي").replace(/z/g, "ز");
-      if (transliterated.length > 0) {
-        arabicWords.push(transliterated);
-      }
-    }
+function getCached(key: string) {
+  const entry = VERIFICATION_CACHE.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiresAt) {
+    VERIFICATION_CACHE.delete(key);
+    return null;
   }
-
-  if (arabicWords.length === 0) return "شركة تجارية ذ.م.م";
-  const filtered = arabicWords.filter(x => x !== "ذ.م.م");
-  if (arabicWords.includes("ذ.م.م") || name.toLowerCase().includes("llc")) {
-    filtered.push("ذ.م.م");
-  }
-  return filtered.join(" ");
+  return entry.body;
 }
 
-function generateFallbackCompany(trimmedName: string, isDulFormat: boolean) {
-  const hash = trimmedName.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const licenseNum = isDulFormat ? trimmedName.toUpperCase() : `DET-${100000 + (hash % 899999)}`;
-  const landlineLast = String(1000 + (hash % 8999)).padStart(4, "0");
-  const landline = `+971 4 34${landlineLast[0]} ${landlineLast.substring(1)}`;
+function setCached(key: string, body: any) {
+  VERIFICATION_CACHE.set(key, { body, expiresAt: Date.now() + CACHE_TTL_MS });
+}
 
-  let generatedCompanyName = trimmedName;
-  if (/^\d+$/.test(trimmedName)) {
-    generatedCompanyName = `Dubai Trade Partner #${trimmedName}`;
-  } else {
-    const upper = trimmedName.toUpperCase();
-    if (!upper.endsWith("LLC") && !upper.endsWith("L.L.C.") && !upper.endsWith("PJSC") && !upper.endsWith("FZE") && !upper.endsWith("EST.")) {
-      generatedCompanyName = `${trimmedName} LLC`;
+async function fetchWithTimeout(url: string, timeoutMs: number) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+      }
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function stripHtml(rawHtml: string) {
+  return rawHtml
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+    .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
+    .replace(/<\/?[^>]+(>|$)/g, " ")
+    .replace(/\s+/g, " ")
+    .substring(0, 15000);
+}
+
+// Best-effort scrape of the Invest in Dubai business directory. Tries a
+// license-number lookup when the input matches that format, otherwise tries
+// a name-based search. Returns "" if nothing usable was retrieved.
+async function scrapeInvestInDubai(trimmedName: string, isDulFormat: boolean): Promise<string> {
+  const url = isDulFormat
+    ? `https://www.investindubai.gov.ae/en/dubai-business-directory-search?dulNo=${encodeURIComponent(trimmedName.toUpperCase())}`
+    : `https://www.investindubai.gov.ae/en/dubai-business-directory-search?companyName=${encodeURIComponent(trimmedName)}`;
+
+  try {
+    const fetchRes = await fetchWithTimeout(url, 6000);
+    if (fetchRes.ok) {
+      const rawHtml = await fetchRes.text();
+      return stripHtml(rawHtml);
     }
+  } catch (err) {
+    console.warn("Invest in Dubai portal lookup failed or timed out (scrape is best-effort, not guaranteed):", err);
   }
-
-  const building = DUBAI_BUILDINGS[hash % DUBAI_BUILDINGS.length];
-  const level = (hash % 40) + 1;
-  const address = `Level ${level}, ${building.name}, ${building.area}, PO Box ${10000 + (hash % 89999)}, Dubai, UAE`;
-
-  let activities = ["General Trading", "Commercial Brokers", "Business Documents Clearing"];
-  const lowerName = generatedCompanyName.toLowerCase();
-
-  if (lowerName.match(/tech|software|comput|digital|system|it|cyber/)) {
-    activities = ["Software House", "Information Technology Consultants", "Computer Systems & Communication Software Trading"];
-  } else if (lowerName.match(/restaurant|cafe|food|beverage|bakery|catering/)) {
-    activities = ["Restaurant", "Cafeteria", "Food and Beverages Trading"];
-  } else if (lowerName.match(/construction|civil|build|contracting|developer|properties|real estate/)) {
-    activities = ["Building Contracting", "Real Estate Buying & Selling Brokerage", "Real Estate Management Supervision"];
-  } else if (lowerName.match(/clinic|medical|health|hospital|dental|pharmacy/)) {
-    activities = ["Medical Clinic", "Healthcare Consulting", "Pharmaceutical Products Trading"];
-  } else if (lowerName.match(/retail|shop|trading|commerce|e-commerce|store|supermarket/)) {
-    activities = ["General Trading", "E-commerce Retail", "Department Store"];
-  } else if (lowerName.match(/consult|management|advisory|advisors|solutions/)) {
-    activities = ["Management Consultancies", "Business Documents Clearing Services", "Corporate Solutions Provider"];
-  } else if (lowerName.match(/logistic|freight|shipping|warehouse|delivery|transport/)) {
-    activities = ["Freight Brokerage", "Warehousing & Storage", "Cargo Transport by Heavy Trucks"];
-  } else if (lowerName.match(/salon|spa|beauty|hair/)) {
-    activities = ["Beauty Salon", "Personal Care Center", "Cosmetics Trading"];
-  } else if (lowerName.match(/school|education|train|academy|college/)) {
-    activities = ["Education and Training Consulting", "Professional Development Training", "Language School"];
-  }
-
-  return {
-    companyName: isDulFormat ? "Al Ghurair Corporate Solutions LLC" : generatedCompanyName,
-    companyNameArabic: translateCompanyToArabic(isDulFormat ? "Al Ghurair Corporate Solutions LLC" : generatedCompanyName),
-    tradeLicenseNumber: licenseNum,
-    licenseType: isDulFormat ? "Limited Liability Company (LLC)" : (generatedCompanyName.toUpperCase().includes("PJSC") ? "Public Joint Stock Company (PJSC)" : "Limited Liability Company (LLC)"),
-    landline: landline,
-    address: address,
-    issueDate: "2018-05-15",
-    expiryDate: "2027-05-14",
-    activities: activities,
-    authority: building.authority,
-    isRealMatch: isDulFormat ? true : false,
-  };
+  return "";
 }
 
 export async function verifyCompany(companyNameInput: unknown) {
@@ -248,6 +188,12 @@ export async function verifyCompany(companyNameInput: unknown) {
   }
 
   const trimmedName = companyNameInput.trim();
+  const cacheKey = trimmedName.toLowerCase();
+
+  const cached = getCached(cacheKey);
+  if (cached) {
+    return { status: 200 as const, body: cached };
+  }
 
   try {
     const localMatch = MOCK_COMPANIES_REGISTRY.find(
@@ -256,40 +202,25 @@ export async function verifyCompany(companyNameInput: unknown) {
     );
 
     if (localMatch) {
+      setCached(cacheKey, localMatch);
       return { status: 200 as const, body: localMatch };
     }
 
     const isDulFormat = /^[A-Z]{2}\d+$/i.test(trimmedName) || trimmedName.toUpperCase() === "AA7298";
-    let fetchedHtmlContent = "";
 
-    if (isDulFormat) {
-      const dulNo = trimmedName.toUpperCase();
-      try {
-        const url = `https://www.investindubai.gov.ae/en/dubai-business-directory-search?dulNo=${encodeURIComponent(dulNo)}`;
-        const fetchRes = await fetch(url, {
-          headers: {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
-          }
-        });
-        if (fetchRes.ok) {
-          const rawHtml = await fetchRes.text();
-          fetchedHtmlContent = rawHtml
-            .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
-            .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, "")
-            .replace(/<\/?[^>]+(>|$)/g, " ")
-            .replace(/\s+/g, " ")
-            .substring(0, 15000);
-        }
-      } catch (err) {
-        console.warn("Live fetch failed (possibly blocked by Cloudflare), using robust prefilled engine:", err);
-      }
-    }
+    // Primary real data source: best-effort scrape of the government portal,
+    // tried by license number format or by name.
+    const fetchedHtmlContent = await scrapeInvestInDubai(trimmedName, isDulFormat);
 
     const ai = getGeminiClient();
 
     if (!ai) {
-      return { status: 200 as const, body: generateFallbackCompany(trimmedName, isDulFormat) };
+      // No AI configured and the portal scrape returned nothing usable:
+      // do NOT fabricate a record. Tell the caller honestly.
+      return {
+        status: 404 as const,
+        body: { error: "We couldn't automatically verify this company. Please enter the company details manually." }
+      };
     }
 
     let prompt = `You are an official system auditor for the Dubai Department of Economy and Tourism (DET) Invest in Dubai Registry.
@@ -348,30 +279,35 @@ Please extract the actual company name, license number, license type, activities
       }
 
       const data = JSON.parse(cleanedText);
-      return {
-        status: 200 as const,
-        body: { ...data, isRealMatch: data.isRealMatch !== undefined ? data.isRealMatch : true }
+
+      // Only treat this as a verified match if we grounded the AI in real
+      // scraped portal text. Otherwise it's an AI web-search suggestion the
+      // user must review and confirm before it's treated as fact.
+      const isVerified = Boolean(fetchedHtmlContent);
+      const body = {
+        ...data,
+        isRealMatch: isVerified,
+        verificationSource: isVerified ? "ded_portal" : "ai_suggested",
+        verificationNote: isVerified
+          ? undefined
+          : "Unverified — generated by AI web search. Please confirm these details before submitting."
       };
+
+      setCached(cacheKey, body);
+      return { status: 200 as const, body };
     } catch (apiError) {
-      return { status: 200 as const, body: generateFallbackCompany(trimmedName, isDulFormat) };
+      // AI call failed and the portal scrape found nothing usable: be honest
+      // instead of inventing a record.
+      return {
+        status: 404 as const,
+        body: { error: "We couldn't automatically verify this company. Please enter the company details manually." }
+      };
     }
   } catch (error) {
-    const hash = trimmedName.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    console.error("Unexpected error during company verification:", error);
     return {
-      status: 200 as const,
-      body: {
-        companyName: trimmedName || "Al Ghurair Corporate Solutions LLC",
-        companyNameArabic: "شركة الغرير للحلول المؤسسية ذ.م.م",
-        tradeLicenseNumber: `DET-${100000 + (hash % 899999)}`,
-        licenseType: "Limited Liability Company (LLC)",
-        landline: "+971 4 382 7777",
-        address: "Level 14, Al Ghurair Centre, Deira, Dubai, UAE",
-        issueDate: "2018-05-15",
-        expiryDate: "2027-05-14",
-        activities: ["Corporate Solutions Provider", "Management Consultancies"],
-        authority: "DET Dubai Economy & Tourism",
-        isRealMatch: false,
-      }
+      status: 500 as const,
+      body: { error: "Verification is temporarily unavailable. Please fill in your details manually." }
     };
   }
 }

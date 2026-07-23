@@ -74,9 +74,9 @@ export default function App() {
   const handleLeadFormSuccess = async (refId: string, lead: LeadFormState) => {
     setSubmittedLead(lead);
     setOpportunityId(null);
-    // Public Liability-only leads skip Step 2 (Coverage Details) and go straight
-    // into the dedicated 5-step Public Liability form.
-    setCurrentView(isPublicLiabilityOnly(lead.selectedProducts) ? "application" : "proceed");
+    // Every lead lands on Step 2 (Coverage Details) regardless of the products
+    // selected. The detailed forms are completed on Step 3 (Application Form).
+    setCurrentView("proceed");
     window.scrollTo({ top: 0, behavior: "smooth" });
 
     // Create/attach the Opportunity + Leads in IMCRM (best-effort; the journey
@@ -224,7 +224,7 @@ export default function App() {
           <div className="animate-in fade-in duration-200">
             <ApplicationFormView
               lead={submittedLead}
-              onBack={() => setCurrentView(isPublicLiabilityOnly(submittedLead.selectedProducts) ? "webform" : "proceed")}
+              onBack={() => setCurrentView("proceed")}
               onCompleteFlow={handleApplicationComplete}
             />
           </div>

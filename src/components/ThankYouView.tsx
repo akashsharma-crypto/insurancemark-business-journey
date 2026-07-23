@@ -36,7 +36,7 @@ export const ThankYouView: React.FC<ThankYouViewProps> = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
 
         {/* Horizontal Stepper Indicator (Consistent through flow) */}
-        <JourneyStepper currentStep={3} />
+        <JourneyStepper currentStep={4} />
 
         {/* SECTION 1: Enquiry Received + Reference ID + Assigned Specialist */}
         <div className="bg-white border border-slate-200/80 rounded-3xl shadow-lg max-w-5xl mx-auto overflow-hidden">

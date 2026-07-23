@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { InsuranceProduct, LeadFormState } from "../types";
+import { JourneyStepper } from "./JourneyStepper";
 import {
-  ArrowLeft, CheckCircle, FileText, ChevronRight, Check, Sparkles, Building2,
+  ArrowLeft, CheckCircle, FileText, ChevronRight, ChevronDown, Check, Sparkles, Building2,
   MapPin, AlertCircle, FileDown, UploadCloud, Loader2, DollarSign, Users, Award,
   Shield, Landmark, HelpCircle, Map, Trash2, Calendar, Plus, Image as ImageIcon
 } from "lucide-react";
@@ -116,6 +117,63 @@ const createEmptyPLLocation = (id: string): PLLocation => ({
   claimsDetails: ""
 });
 
+// Collapsible section used to turn the multi-page proposal forms into a single
+// scrollable page: only one section is expanded at a time, and pressing the
+// section's "Save & Continue" collapses it and opens the next one.
+const AccordionSection: React.FC<{
+  index: number;
+  openSection: number;
+  setOpenSection: (i: number) => void;
+  total: number;
+  title: string;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+  lastAction?: React.ReactNode;
+  nextLabel?: string;
+}> = ({ index, openSection, setOpenSection, total, title, icon, children, lastAction, nextLabel }) => {
+  const isOpen = openSection === index;
+  const isDone = openSection > index;
+  const isLast = index === total - 1;
+  return (
+    <div className={`border rounded-2xl overflow-hidden transition-all ${isOpen ? "border-blue-300 shadow-sm" : "border-slate-200"}`}>
+      <button
+        type="button"
+        onClick={() => setOpenSection(isOpen ? -1 : index)}
+        className={`w-full flex items-center justify-between gap-3 px-5 py-4 text-left cursor-pointer transition-colors ${isOpen ? "bg-blue-50/50" : "bg-white hover:bg-slate-50"}`}
+      >
+        <span className="flex items-center gap-3 min-w-0">
+          <span className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-black shrink-0 ${isDone ? "bg-green-500 text-white" : isOpen ? "bg-blue-900 text-white" : "bg-slate-100 text-slate-500"}`}>
+            {isDone ? <Check size={13} className="stroke-[3]" /> : index + 1}
+          </span>
+          <span className="text-xs font-black uppercase tracking-widest text-blue-900 flex items-center gap-2 truncate">
+            {icon}
+            <span className="truncate">{title}</span>
+          </span>
+        </span>
+        <ChevronDown size={18} className={`text-slate-400 shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+      {isOpen && (
+        <div className="px-5 sm:px-6 pb-6 pt-4 space-y-6 border-t border-slate-100 animate-in fade-in duration-150">
+          {children}
+          {(!isLast || lastAction) && (
+            <div className="flex justify-end pt-4 border-t border-slate-100">
+              {isLast ? lastAction : (
+                <button
+                  type="button"
+                  onClick={() => setOpenSection(index + 1)}
+                  className="bg-blue-900 hover:bg-blue-800 text-white py-2.5 px-6 rounded-xl text-xs font-black cursor-pointer transition-colors"
+                >
+                  {nextLabel || "Save & Continue"}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
   lead,
   onBack,
@@ -128,9 +186,21 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
     return prods.length === 1 && (prods[0] === InsuranceProduct.PublicLiability || prods[0] === InsuranceProduct.PublicLiabilitySelect);
   })();
 
-  // Determine default form type based on selected products
-  const [selectedFormType, setSelectedFormType] = useState<"SME" | "PL" | "DO" | "Offline">(isPlOnlyDirect ? "PL" : "SME");
+  // Determine default form type based on selected products: land the applicant
+  // directly on whichever cover they picked (PL or D&O) instead of always
+  // defaulting to the generic SME package form.
+  const [selectedFormType, setSelectedFormType] = useState<"SME" | "PL" | "DO" | "Offline">(() => {
+    const prods = lead.selectedProducts || [];
+    const hasPL = prods.includes(InsuranceProduct.PublicLiability) || prods.includes(InsuranceProduct.PublicLiabilitySelect);
+    const hasDO = prods.includes(InsuranceProduct.DirectorsOfficers) || prods.includes(InsuranceProduct.DirectorsOfficersSelect);
+    if (hasPL) return "PL";
+    if (hasDO) return "DO";
+    return "SME";
+  });
   const [activeTab, setActiveTab] = useState<number>(1);
+  // Which accordion section is currently expanded (shared across the rendered form,
+  // since only one form is shown at a time). -1 means all collapsed.
+  const [openSection, setOpenSection] = useState<number>(0);
 
   // SME Form is always displayed as the primary underwriting form on the screen.
   // Standalone Public Liability (PL) and Directors & Officers (D&O) can be toggled as supplementary sections.
@@ -570,6 +640,27 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
     };
   });
 
+  // Public Liability now reuses the Directors & Officers proposal layout, so it
+  // gets its own independent copy of that form's state.
+  const [plForm2, setPlForm2] = useState(() => {
+    return {
+      companyName: lead.companyName || "",
+      tradeLicense: lead.tradeLicense || "",
+      authority: vc?.authority || "",
+      incorporatedYear: vc?.issueDate ? vc.issueDate.substring(0, 4) : "",
+      paidUpCapital: "",
+      hasSubsidiaries: "",
+      totalAssets: "",
+      annualTurnover: "",
+      netProfit: "",
+      listedStatus: vc?.licenseType || "",
+      numberOfDirectors: "",
+      hasPastClaims: "",
+      pastClaimsDetail: "",
+      agreedToDeclaration: false
+    };
+  });
+
   // Offline upload simulator state
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
@@ -603,62 +694,198 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
       } else if (selectedFormType === "SME") {
         onCompleteFlow("SME Package Digital Proposal", smeForm);
       } else if (selectedFormType === "PL") {
-        onCompleteFlow("Public Liability Digital Proposal", plForm);
+        onCompleteFlow("Public Liability Digital Proposal", plForm2);
       } else {
         onCompleteFlow("Offline Proposal Upload", { uploadedFiles });
       }
     }, 1200);
   };
 
+  // Renders the Directors & Officers-style proposal as a single-page accordion.
+  // Reused for both the D&O cover and (per requirement) the Public Liability cover.
+  const renderEntityForm = (
+    form: any,
+    setForm: (v: any) => void,
+    submitLabel: string
+  ) => (
+    <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-4">
+      <AccordionSection index={0} openSection={openSection} setOpenSection={setOpenSection} total={4} title="Corporate Setup" icon={<Building2 size={14} />}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center">
+              <label className="text-xs font-extrabold text-slate-700">Legal Entity Name</label>
+              {isFieldAutoFilled("companyName") && <AutoFillBadge />}
+            </div>
+            <input
+              type="text"
+              value={form.companyName}
+              onChange={(e) => setForm({ ...form, companyName: e.target.value })}
+              className={`w-full py-3 px-4 rounded-xl text-xs font-bold outline-none transition-all ${
+                isFieldAutoFilled("companyName")
+                  ? "bg-green-50/20 border-2 border-green-300 text-slate-800"
+                  : "bg-white border border-slate-200 text-slate-800 focus:border-blue-950"
+              }`}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center">
+              <label className="text-xs font-extrabold text-slate-700">Trade License Number</label>
+              {isFieldAutoFilled("tradeLicense") && <AutoFillBadge />}
+            </div>
+            <input
+              type="text"
+              value={form.tradeLicense}
+              onChange={(e) => setForm({ ...form, tradeLicense: e.target.value })}
+              className={`w-full py-3 px-4 rounded-xl text-xs font-mono font-bold outline-none transition-all ${
+                isFieldAutoFilled("tradeLicense")
+                  ? "bg-green-50/20 border-2 border-green-300 text-slate-800"
+                  : "bg-white border border-slate-200 text-slate-800 focus:border-blue-950"
+              }`}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center">
+              <label className="text-xs font-extrabold text-slate-700">Licensing Authority</label>
+              {vc?.authority && <AutoFillBadge />}
+            </div>
+            <input
+              type="text"
+              value={form.authority}
+              onChange={(e) => setForm({ ...form, authority: e.target.value })}
+              placeholder="e.g. DET Dubai"
+              className={`w-full py-3 px-4 rounded-xl text-xs font-bold outline-none transition-all ${
+                vc?.authority
+                  ? "bg-green-50/20 border-2 border-green-300 text-slate-800"
+                  : "bg-white border border-slate-200 text-slate-800 focus:border-blue-950"
+              }`}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-extrabold text-slate-700">Year of Original Incorporation</label>
+            <input
+              type="text"
+              value={form.incorporatedYear}
+              onChange={(e) => setForm({ ...form, incorporatedYear: e.target.value })}
+              placeholder="e.g. 2018"
+              className="w-full bg-white border border-slate-200 py-3 px-4 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-900 outline-none text-slate-800"
+            />
+          </div>
+        </div>
+      </AccordionSection>
+
+      <AccordionSection index={1} openSection={openSection} setOpenSection={setOpenSection} total={4} title="Financial Risk Profile" icon={<DollarSign size={14} />}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="space-y-1.5">
+            <label className="text-xs font-extrabold text-slate-700">Total Group Assets (AED)</label>
+            <input type="text" value={form.totalAssets} onChange={(e) => setForm({ ...form, totalAssets: e.target.value })}
+              className="w-full bg-white border border-slate-200 py-3 px-4 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-900 outline-none text-slate-800" />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-extrabold text-slate-700">Annual Turnover (Gross in AED)</label>
+            <input type="text" value={form.annualTurnover} onChange={(e) => setForm({ ...form, annualTurnover: e.target.value })}
+              className="w-full bg-white border border-slate-200 py-3 px-4 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-900 outline-none text-slate-800" />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-extrabold text-slate-700">Net Profit after Taxes (AED)</label>
+            <input type="text" value={form.netProfit} onChange={(e) => setForm({ ...form, netProfit: e.target.value })}
+              className="w-full bg-white border border-slate-200 py-3 px-4 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-900 outline-none text-slate-800" />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-extrabold text-slate-700">Listing/Shareholding Status</label>
+            <select value={form.listedStatus} onChange={(e) => setForm({ ...form, listedStatus: e.target.value })}
+              className="w-full bg-white border border-slate-200 py-3 px-4 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-900 outline-none text-slate-800">
+              <option value="">-- Select Status --</option>
+              <option>Private LLC</option>
+              <option>Public Joint Stock Company (PJSC)</option>
+              <option>Freezone Offshore Company</option>
+            </select>
+          </div>
+        </div>
+      </AccordionSection>
+
+      <AccordionSection index={2} openSection={openSection} setOpenSection={setOpenSection} total={4} title="Management Board" icon={<Users size={14} />}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="space-y-1.5">
+            <label className="text-xs font-extrabold text-slate-700">Number of Sitting Directors</label>
+            <input type="number" value={form.numberOfDirectors} onChange={(e) => setForm({ ...form, numberOfDirectors: e.target.value })}
+              className="w-full bg-white border border-slate-200 py-3 px-4 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-900 outline-none text-slate-800" />
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs font-extrabold text-slate-700">Does the company have active subsidiaries?</label>
+            <select value={form.hasSubsidiaries} onChange={(e) => setForm({ ...form, hasSubsidiaries: e.target.value })}
+              className="w-full bg-white border border-slate-200 py-3 px-4 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-900 outline-none text-slate-800">
+              <option value="">-- Select option --</option>
+              <option>No</option>
+              <option>Yes (Local only)</option>
+              <option>Yes (Foreign / Overseas)</option>
+            </select>
+          </div>
+        </div>
+      </AccordionSection>
+
+      <AccordionSection
+        index={3}
+        openSection={openSection}
+        setOpenSection={setOpenSection}
+        total={4}
+        title="Loss History & Declaration"
+        icon={<Shield size={14} />}
+        lastAction={
+          <button
+            type="submit"
+            disabled={submitting || !form.agreedToDeclaration}
+            className={`font-black text-xs py-3.5 px-8 rounded-xl flex items-center gap-1.5 shadow-md ${
+              !form.agreedToDeclaration || submitting
+                ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
+                : "bg-yellow-400 hover:bg-yellow-500 text-blue-950 shadow-yellow-400/10 cursor-pointer"
+            }`}
+          >
+            {submitting ? <Loader2 size={14} className="animate-spin" /> : <Award size={14} />}
+            <span>{submitLabel}</span>
+          </button>
+        }
+      >
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-extrabold text-slate-700">Any claims or circumstances in the past 5 years?</label>
+            <select value={form.hasPastClaims} onChange={(e) => setForm({ ...form, hasPastClaims: e.target.value })}
+              className="w-full bg-white border border-slate-200 py-3 px-4 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-900 outline-none text-slate-800">
+              <option value="">-- Select option --</option>
+              <option>No</option>
+              <option>Yes</option>
+            </select>
+          </div>
+          {form.hasPastClaims === "Yes" && (
+            <div className="space-y-1.5 animate-in slide-in-from-top-2">
+              <label className="text-xs font-extrabold text-slate-700">Please provide brief details</label>
+              <textarea value={form.pastClaimsDetail} onChange={(e) => setForm({ ...form, pastClaimsDetail: e.target.value })} rows={3}
+                className="w-full bg-white border border-slate-200 py-3 px-4 rounded-xl text-xs font-bold focus:ring-2 focus:ring-blue-900 outline-none text-slate-800" />
+            </div>
+          )}
+
+          <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs text-slate-600 leading-relaxed">
+            <p className="font-bold text-slate-800 mb-1.5">Declaration and Legal Binding Statement:</p>
+            I hereby declare that the particulars and answers given in this digital proposal are true, accurate, and complete, and that no material facts have been withheld or omitted. I agree that this proposal form shall be the basis of the contract between the company and the underwriters.
+          </div>
+
+          <label className="flex items-start gap-3 cursor-pointer select-none">
+            <input type="checkbox" checked={form.agreedToDeclaration} onChange={(e) => setForm({ ...form, agreedToDeclaration: e.target.checked })}
+              className="w-4 h-4 rounded border-slate-200 mt-0.5 text-blue-900 focus:ring-blue-900 cursor-pointer" />
+            <span className="text-xs font-extrabold text-slate-800">
+              I accept the declaration and authorize corporate tender sourcing.
+            </span>
+          </label>
+        </div>
+      </AccordionSection>
+    </form>
+  );
+
   return (
     <div className="bg-[#f8fafc] min-h-screen py-10 sm:py-14">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 animate-in fade-in duration-300">
         
-        {/* Horizontal Stepper (Steps 1 & 2 are completed, Step 3 is active) */}
-        <div className="bg-white border border-slate-100 p-5 rounded-2xl shadow-xs flex items-center justify-between overflow-x-auto max-w-4xl mx-auto">
-          <div className="flex items-center gap-2.5 shrink-0">
-            <div className="w-8 h-8 rounded-full bg-green-500 text-white font-black flex items-center justify-center text-xs">
-              <Check size={14} className="stroke-[3]" />
-            </div>
-            <div className="text-left">
-              <p className="text-[10px] text-green-600 font-bold leading-none uppercase">Completed</p>
-              <p className="text-xs font-black text-slate-800">Business & Contact</p>
-            </div>
-          </div>
-          <ChevronRight className="text-slate-200 hidden sm:block shrink-0" size={16} />
-
-          <div className="flex items-center gap-2.5 shrink-0">
-            <div className="w-8 h-8 rounded-full bg-green-500 text-white font-black flex items-center justify-center text-xs">
-              <Check size={14} className="stroke-[3]" />
-            </div>
-            <div className="text-left">
-              <p className="text-[10px] text-green-600 font-bold leading-none uppercase">Completed</p>
-              <p className="text-xs font-black text-slate-800">Coverage Details</p>
-            </div>
-          </div>
-          <ChevronRight className="text-slate-200 hidden sm:block shrink-0" size={16} />
-
-          <div className="flex items-center gap-2.5 shrink-0">
-            <div className="w-8 h-8 rounded-full bg-yellow-400 text-blue-950 font-black flex items-center justify-center text-xs shadow-md shadow-yellow-400/20 animate-pulse">
-              3
-            </div>
-            <div className="text-left">
-              <p className="text-[10px] text-slate-400 font-bold leading-none uppercase">Step 3</p>
-              <p className="text-xs font-black text-slate-800">Digital Form Filling</p>
-            </div>
-          </div>
-          <ChevronRight className="text-slate-200 hidden sm:block shrink-0" size={16} />
-
-          <div className="flex items-center gap-2.5 shrink-0 opacity-40">
-            <div className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 font-black flex items-center justify-center text-xs">
-              4
-            </div>
-            <div className="text-left">
-              <p className="text-[10px] text-slate-400 font-bold leading-none uppercase">Step 4</p>
-              <p className="text-xs font-bold text-slate-600">Confirmation</p>
-            </div>
-          </div>
-        </div>
+        {/* Horizontal Stepper (Step 3: Application Form active) */}
+        <JourneyStepper currentStep={3} />
 
         {/* Back Button */}
         <button
@@ -666,7 +893,7 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
           className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-900 text-xs font-bold transition-colors cursor-pointer group"
         >
           <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
-          <span>{isPlOnlyDirect ? "Back to Business Details" : "Change submission method"}</span>
+          <span>Back to Coverage Details</span>
         </button>
 
         {/* Dynamic Header */}
@@ -697,6 +924,7 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                 onClick={() => {
                   setSelectedFormType(formOpt.id as any);
                   setActiveTab(1);
+                  setOpenSection(0);
                 }}
                 className={`flex-1 min-w-[130px] py-2.5 px-3 text-xs font-extrabold rounded-xl text-center transition-all cursor-pointer ${
                   selectedFormType === formOpt.id
@@ -756,15 +984,8 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                 </div>
               )}
 
-              {/* SME Section 1: Business Details */}
-              <div className="space-y-6">
-                <div className="border-b border-slate-100 pb-3">
-                  <h3 className="text-xs font-black uppercase tracking-widest text-blue-900 flex items-center gap-2">
-                    <Building2 size={16} />
-                    <span>1. General Business Details</span>
-                  </h3>
-                </div>
-                <div className="space-y-6 animate-in fade-in duration-150">
+              <AccordionSection index={0} openSection={openSection} setOpenSection={setOpenSection} total={4} title="General Business Details" icon={<Building2 size={14} />}>
+                <div className="space-y-6">
                   <div className="bg-slate-50/50 p-4 rounded-2xl border border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <span className="text-[10px] text-slate-400 uppercase tracking-wider block font-bold">Primary Product Select</span>
@@ -888,17 +1109,10 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                     </div>
                   </div>
                 </div>
-              </div>
+              </AccordionSection>
 
-              {/* SME Section 2: Core Cover Sums */}
-              <div className="space-y-8 pt-6 border-t border-slate-100">
-                <div className="border-b border-slate-100 pb-3">
-                  <h3 className="text-xs font-black uppercase tracking-widest text-blue-900 flex items-center gap-2">
-                    <Building2 size={16} />
-                    <span>2. Core Cover Sums</span>
-                  </h3>
-                </div>
-                <div className="space-y-8 animate-in fade-in duration-150">
+              <AccordionSection index={1} openSection={openSection} setOpenSection={setOpenSection} total={4} title="Core Cover Sums" icon={<Building2 size={14} />}>
+                <div className="space-y-8">
                   {/* Your Assets */}
                   <div className="space-y-4">
                     <h3 className="text-sm font-black text-blue-950 border-b border-slate-100 pb-2 flex items-center gap-2">
@@ -1141,17 +1355,10 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                     </div>
                   </div>
                 </div>
-              </div>
+              </AccordionSection>
 
-              {/* SME Section 3: Additional Covers & Risks */}
-              <div className="space-y-8 pt-6 border-t border-slate-100">
-                <div className="border-b border-slate-100 pb-3">
-                  <h3 className="text-xs font-black uppercase tracking-widest text-blue-900 flex items-center gap-2">
-                    <Shield size={16} />
-                    <span>3. Additional Covers & Risks</span>
-                  </h3>
-                </div>
-                <div className="space-y-8 animate-in fade-in duration-150">
+              <AccordionSection index={2} openSection={openSection} setOpenSection={setOpenSection} total={4} title="Additional Covers & Risks" icon={<Shield size={14} />}>
+                <div className="space-y-8">
                   
                   {/* Additional Cover limits */}
                   <div className="space-y-4">
@@ -1313,17 +1520,10 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                     </div>
                   </div>
                 </div>
-              </div>
+              </AccordionSection>
 
-              {/* SME Section 4: Locations & Proposer Declaration */}
-              <div className="space-y-8 pt-6 border-t border-slate-100">
-                <div className="border-b border-slate-100 pb-3">
-                  <h3 className="text-xs font-black uppercase tracking-widest text-blue-900 flex items-center gap-2">
-                    <Map size={16} />
-                    <span>4. Locations & Proposer Declaration</span>
-                  </h3>
-                </div>
-                <div className="space-y-8 animate-in fade-in duration-150">
+              <AccordionSection index={3} openSection={openSection} setOpenSection={setOpenSection} total={4} title="Locations & Proposer Declaration" icon={<Map size={14} />}>
+                <div className="space-y-8">
                   
                   {/* Additional Locations */}
                   <div className="space-y-4">
@@ -1436,7 +1636,7 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                     </div>
                   </div>
                 </div>
-              </div>
+              </AccordionSection>
 
               {/* Master Submission Action */}
               <div className="pt-6 border-t border-slate-100 flex justify-end">
@@ -1456,8 +1656,11 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
             </form>
           )}
 
-          {/* ======================= FORM 2: PUBLIC LIABILITY PROPOSAL FORM ======================= */}
-          {selectedFormType === "PL" && (
+          {/* ======================= FORM 2: PUBLIC LIABILITY (replicates the D&O proposal layout) ======================= */}
+          {selectedFormType === "PL" && renderEntityForm(plForm2, setPlForm2, "Submit Public Liability Application")}
+
+          {/* Legacy detailed Public Liability form — retained but disabled in favour of the D&O-style accordion above. */}
+          {false && selectedFormType === "PL" && (
             <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-8">
               {/* 5-Step Progress Tabs */}
               <div className="flex border-b border-slate-100 overflow-x-auto gap-4 scrollbar-none pb-0.5">
@@ -2386,7 +2589,10 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
           )}
 
           {/* ======================= FORM 3: DIRECTORS & OFFICERS PROPOSAL FORM ======================= */}
-          {selectedFormType === "DO" && (
+          {selectedFormType === "DO" && renderEntityForm(doForm, setDoForm, "Submit Complete D&O Application")}
+
+          {/* Legacy tabbed D&O form — retained but disabled in favour of the accordion above. */}
+          {false && selectedFormType === "DO" && (
             <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-8">
               {/* Form Tabs Navigation */}
               <div className="flex border-b border-slate-100 overflow-x-auto gap-4 scrollbar-none pb-0.5">
@@ -2813,6 +3019,7 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                             setSelectedFormType("SME");
                           }
                           setActiveTab(1);
+                          setOpenSection(0);
                         }}
                         className="bg-green-600 hover:bg-green-700 text-white text-xs font-black py-2 px-4 rounded-xl flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer shadow-sm hover:shadow-md"
                       >

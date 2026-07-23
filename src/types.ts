@@ -91,6 +91,8 @@ export interface VerifiedCompany {
   activities: string[];
   authority: string; // e.g., DET (Dubai Economy and Tourism), DMCC, DDA
   isRealMatch: boolean;
+  verificationSource?: "local_registry" | "ded_portal" | "ai_suggested";
+  verificationNote?: string;
 }
 
 export interface LeadFormState {
