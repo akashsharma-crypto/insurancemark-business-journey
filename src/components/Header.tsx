@@ -1,13 +1,18 @@
 import React, { useState } from "react";
-import { Phone, Star, Award, User, MessageSquare, Clock, Check, X, Calendar, Video, Loader2 } from "lucide-react";
+import { Phone, Star, Award, User, MessageSquare, Clock, Check, X, Calendar, Video, Loader2, Menu, ChevronRight } from "lucide-react";
+import { InsuranceProduct } from "../types";
+import { BUSINESS_LOB_ITEMS } from "./Hero";
+import { getBusinessIcon } from "../data/businessIcons";
 
 interface HeaderProps {
   onGoHome: () => void;
   showCoordinator?: boolean;
+  onSelectProduct: (product: InsuranceProduct) => void;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onGoHome, showCoordinator = false }) => {
+export const Header: React.FC<HeaderProps> = ({ onGoHome, showCoordinator = false, onSelectProduct }) => {
   const [showCoordinatorPopup, setShowCoordinatorPopup] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
 
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-slate-100 shadow-xs">
@@ -141,6 +146,48 @@ export const Header: React.FC<HeaderProps> = ({ onGoHome, showCoordinator = fals
                 </a>
               </>
             )}
+
+            {/* Hamburger Menu — Business Insurance landing pages */}
+            <div className="relative">
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                aria-label="Open products menu"
+                className="w-10 h-10 rounded-xl bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-100 text-slate-600 hover:text-blue-900 flex items-center justify-center transition-all duration-200 cursor-pointer shrink-0"
+              >
+                {showMenu ? <X size={18} /> : <Menu size={18} />}
+              </button>
+
+              {showMenu && (
+                <div className="absolute right-0 mt-3 w-72 bg-white border border-slate-200 rounded-2xl shadow-xl p-3 z-50 animate-in fade-in slide-in-from-top-3 duration-200 text-left">
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-2 pt-1 pb-2">
+                    Business Insurance
+                  </p>
+                  <div className="space-y-0.5 max-h-96 overflow-y-auto">
+                    {BUSINESS_LOB_ITEMS.map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => {
+                          onSelectProduct(item.id);
+                          setShowMenu(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer group"
+                      >
+                        <img
+                          src={getBusinessIcon(item.id)}
+                          alt={item.label}
+                          className="w-8 h-8 object-cover object-top rounded-lg shrink-0"
+                          referrerPolicy="no-referrer"
+                        />
+                        <span className="flex-1 text-xs font-bold text-slate-700 group-hover:text-blue-900 text-left">
+                          {item.label}
+                        </span>
+                        <ChevronRight size={14} className="text-slate-300 group-hover:text-blue-900 group-hover:translate-x-0.5 transition-all shrink-0" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
 
           </div>
 

@@ -152,7 +152,7 @@ export default function App() {
     <div className="min-h-screen bg-slate-50 flex flex-col justify-between">
       
       {/* Shared Brand Header */}
-      <Header onGoHome={handleGoHome} showCoordinator={isLeadSubmitted} />
+      <Header onGoHome={handleGoHome} showCoordinator={isLeadSubmitted} onSelectProduct={handleSelectProduct} />
 
       {/* Main viewport */}
       <main className="flex-1">
@@ -160,7 +160,6 @@ export default function App() {
         {(currentView === "home" || currentView === "multi-select") && (
           <div className="animate-in fade-in duration-200">
             <Hero
-              onSelectProduct={handleSelectProduct}
               onSelectPersonalProduct={handleSelectPersonalProduct}
               onViewMoreProducts={handleViewMoreProducts}
             />

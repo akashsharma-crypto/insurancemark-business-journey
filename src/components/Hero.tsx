@@ -4,7 +4,6 @@ import { InsuranceProduct } from "../types";
 import { getBusinessIcon } from "../data/businessIcons";
 
 interface HeroProps {
-  onSelectProduct: (product: InsuranceProduct) => void;
   onSelectPersonalProduct: (productName: string) => void;
   onViewMoreProducts: () => void;
 }
@@ -22,7 +21,7 @@ const PERSONAL_LOB_ITEMS = [
   { label: "Job Loss", icon: "/assets/lob-business/professional-indemnity.png" },
 ];
 
-const BUSINESS_LOB_ITEMS = [
+export const BUSINESS_LOB_ITEMS = [
   { id: InsuranceProduct.GroupHealth, label: "Group Health" },
   { id: InsuranceProduct.Sme, label: "SME Insurance" },
   { id: InsuranceProduct.ProfessionalIndemnity, label: "Professional Indemnity" },
@@ -33,7 +32,7 @@ const BUSINESS_LOB_ITEMS = [
   { id: InsuranceProduct.MarineCargo, label: "Marine Cargo" },
 ];
 
-export const Hero: React.FC<HeroProps> = ({ onSelectProduct, onSelectPersonalProduct, onViewMoreProducts }) => {
+export const Hero: React.FC<HeroProps> = ({ onSelectPersonalProduct, onViewMoreProducts }) => {
   return (
     <section className="relative overflow-hidden bg-[#e0f2fe] text-slate-800 pt-16 pb-12 border-b border-sky-100">
 
@@ -170,7 +169,7 @@ export const Hero: React.FC<HeroProps> = ({ onSelectProduct, onSelectPersonalPro
               {BUSINESS_LOB_ITEMS.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => onSelectProduct(item.id)}
+                  onClick={onViewMoreProducts}
                   className="flex flex-col items-center text-center gap-1.5 cursor-pointer group min-w-0"
                 >
                   <img
