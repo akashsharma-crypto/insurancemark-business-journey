@@ -61,6 +61,7 @@ export const PRODUCT_CATEGORIES = [
   {
     title: "Employee & Group Covers",
     products: [
+      { id: InsuranceProduct.GroupHealth, label: "Group Health" },
       { id: InsuranceProduct.WorkmenCompensationSelect, label: "Workmen Compensation" },
       { id: InsuranceProduct.GroupTravelSelect, label: "Group Travel" },
       { id: InsuranceProduct.PoliticalViolenceSelect, label: "Political Violence" }

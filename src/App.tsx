@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { InsuranceProduct, LeadFormState } from "./types";
 import { PRODUCT_DETAILS_MAP } from "./data/products";
 import { Header } from "./components/Header";
-import { Hero } from "./components/Hero";
+import { Hero, BUSINESS_ICON_TO_CATALOG_ID } from "./components/Hero";
 import { InsuranceSelector } from "./components/InsuranceSelector";
 import { MyAlfredPromo } from "./components/MyAlfredPromo";
 import { AwardsSection } from "./components/AwardsSection";
@@ -54,7 +54,7 @@ export default function App() {
   };
 
   const handleSelectBusinessProduct = (productId: InsuranceProduct) => {
-    setWebformPreselected([productId]);
+    setWebformPreselected([BUSINESS_ICON_TO_CATALOG_ID[productId] ?? productId]);
     setCurrentView("multi-select");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };

@@ -33,6 +33,22 @@ export const BUSINESS_LOB_ITEMS = [
   { id: InsuranceProduct.MarineCargo, label: "Marine Cargo" },
 ];
 
+// The multi-select catalogue (MultiSelectView's PRODUCT_CATEGORIES) uses its
+// own "*Select" enum members for some covers instead of these landing-page
+// ids. Map each home-page icon to the id its catalogue card actually uses,
+// so pre-selecting a product highlights the matching card instead of a
+// phantom, invisible selection.
+export const BUSINESS_ICON_TO_CATALOG_ID: Partial<Record<InsuranceProduct, InsuranceProduct>> = {
+  [InsuranceProduct.GroupHealth]: InsuranceProduct.GroupHealth,
+  [InsuranceProduct.Sme]: InsuranceProduct.SmePackage,
+  [InsuranceProduct.ProfessionalIndemnity]: InsuranceProduct.ProfessionalIndemnitySelect,
+  [InsuranceProduct.PublicLiability]: InsuranceProduct.PublicLiabilitySelect,
+  [InsuranceProduct.WorkmenCompensation]: InsuranceProduct.WorkmenCompensationSelect,
+  [InsuranceProduct.ContractorAllRisk]: InsuranceProduct.ContractorAllRiskSelect,
+  [InsuranceProduct.Property]: InsuranceProduct.PropertyAllRisk,
+  [InsuranceProduct.MarineCargo]: InsuranceProduct.Marine,
+};
+
 export const Hero: React.FC<HeroProps> = ({ onSelectPersonalProduct, onViewMoreProducts, onSelectBusinessProduct }) => {
   return (
     <section className="relative overflow-hidden bg-[#e0f2fe] text-slate-800 pt-16 pb-12 border-b border-sky-100">
