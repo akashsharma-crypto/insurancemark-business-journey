@@ -48,6 +48,13 @@ export default function App() {
   };
 
   const handleViewMoreProducts = () => {
+    setWebformPreselected([]);
+    setCurrentView("multi-select");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleSelectBusinessProduct = (productId: InsuranceProduct) => {
+    setWebformPreselected([productId]);
     setCurrentView("multi-select");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -162,6 +169,7 @@ export default function App() {
             <Hero
               onSelectPersonalProduct={handleSelectPersonalProduct}
               onViewMoreProducts={handleViewMoreProducts}
+              onSelectBusinessProduct={handleSelectBusinessProduct}
             />
             <InsuranceSelector
               onViewMoreProducts={handleViewMoreProducts}

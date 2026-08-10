@@ -6,6 +6,7 @@ import { getBusinessIcon } from "../data/businessIcons";
 interface HeroProps {
   onSelectPersonalProduct: (productName: string) => void;
   onViewMoreProducts: () => void;
+  onSelectBusinessProduct: (product: InsuranceProduct) => void;
 }
 
 const PERSONAL_LOB_ITEMS = [
@@ -32,7 +33,7 @@ export const BUSINESS_LOB_ITEMS = [
   { id: InsuranceProduct.MarineCargo, label: "Marine Cargo" },
 ];
 
-export const Hero: React.FC<HeroProps> = ({ onSelectPersonalProduct, onViewMoreProducts }) => {
+export const Hero: React.FC<HeroProps> = ({ onSelectPersonalProduct, onViewMoreProducts, onSelectBusinessProduct }) => {
   return (
     <section className="relative overflow-hidden bg-[#e0f2fe] text-slate-800 pt-16 pb-12 border-b border-sky-100">
 
@@ -169,7 +170,7 @@ export const Hero: React.FC<HeroProps> = ({ onSelectPersonalProduct, onViewMoreP
               {BUSINESS_LOB_ITEMS.map((item) => (
                 <button
                   key={item.id}
-                  onClick={onViewMoreProducts}
+                  onClick={() => onSelectBusinessProduct(item.id)}
                   className="flex flex-col items-center text-center gap-1.5 cursor-pointer group min-w-0"
                 >
                   <img
