@@ -59,18 +59,18 @@ export const QuoteFormView: React.FC<QuoteFormViewProps> = ({
   onBack,
   onSubmitSuccess
 }) => {
-  // Main form states
+  // Main form states — pre-filled with sample values; every field remains fully editable.
   const [form, setForm] = useState<LeadFormState>({
-    companyName: "",
-    companyLandline: "",
+    companyName: "XYZ Company LLC",
+    companyLandline: "+971 4 123 4567",
     tradeLicense: "",
-    contactName: "",
-    contactEmail: "",
-    contactMobile: "",
+    contactName: "Akash Sharma",
+    contactEmail: "Akash.sharma@myalfred.com",
+    contactMobile: "+971 55 222 3698",
     selectedProducts: preselectedProducts,
     emirate: "Dubai",
-    businessActivity: "",
-    businessDescription: ""
+    businessActivity: "Management / Business Consultancy",
+    businessDescription: "We provide professional business consultancy services across the UAE."
   });
 
   // UI state managers
