@@ -117,6 +117,31 @@ const createEmptyPLLocation = (id: string): PLLocation => ({
   claimsDetails: ""
 });
 
+// Workmen's Compensation: occupancy classifications used for per-location risk assessment.
+const WC_OCCUPANCY_OPTIONS = [
+  "Office",
+  "Restaurant or cafe",
+  "Retail shop",
+  "Warehouse or storage facility",
+  "Workshop or factory",
+  "Construction site",
+  "Other"
+];
+
+interface WCLocation {
+  id: string;
+  address: string;
+  limitOfIndemnity: string;
+  occupancy: string;
+}
+
+const createEmptyWCLocation = (id: string): WCLocation => ({
+  id,
+  address: "",
+  limitOfIndemnity: "",
+  occupancy: "Office"
+});
+
 // Collapsible section used to turn the multi-page proposal forms into a single
 // scrollable page: only one section is expanded at a time, and pressing the
 // section's "Save & Continue" collapses it and opens the next one.
@@ -193,9 +218,10 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
     ? lead.selectedProducts
     : [InsuranceProduct.BusinessInsurance];
 
-  const productFormKind = (p: InsuranceProduct): "SME" | "PL" | "DO" | "UPLOAD" => {
+  const productFormKind = (p: InsuranceProduct): "SME" | "PL" | "DO" | "WC" | "UPLOAD" => {
     if (p === InsuranceProduct.PublicLiability || p === InsuranceProduct.PublicLiabilitySelect) return "PL";
     if (p === InsuranceProduct.DirectorsOfficers || p === InsuranceProduct.DirectorsOfficersSelect) return "DO";
+    if (p === InsuranceProduct.WorkmenCompensation || p === InsuranceProduct.WorkmenCompensationSelect) return "WC";
     if (p === InsuranceProduct.Sme || p === InsuranceProduct.SmePackage || p === InsuranceProduct.BusinessInsurance) return "SME";
     return "UPLOAD";
   };
@@ -210,7 +236,7 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
   });
   const activeProduct = prodsSelected[activeProductIdx] ?? prodsSelected[0];
   const activeKind = productFormKind(activeProduct);
-  const selectedFormType: "SME" | "PL" | "DO" | "Offline" = activeKind === "UPLOAD" ? "Offline" : activeKind;
+  const selectedFormType: "SME" | "PL" | "DO" | "WC" | "Offline" = activeKind === "UPLOAD" ? "Offline" : activeKind;
   const [activeTab, setActiveTab] = useState<number>(1);
   // Which accordion section is currently expanded (shared across the rendered form,
   // since only one form is shown at a time). -1 means all collapsed.
@@ -675,6 +701,83 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
     };
   });
 
+  // Form State 4: Standalone Workmen's Compensation Form
+  // 3-section flow: Company Details -> Location Risk Assessment -> Occupation Type
+  const [wcForm, setWcForm] = useState(() => {
+    return {
+      companyName: lead.companyName || "",
+      tradeLicenseNumber: lead.tradeLicense || "",
+      businessActivity: "",
+      businessDescription: lead.businessDescription || lead.businessActivity || (vc?.activities && vc.activities.join(", ")) || "",
+      contactPerson: lead.contactName || "",
+      contactEmail: lead.contactEmail || "",
+      contactPhone: lead.contactMobile || "",
+
+      numberOfLocations: 1,
+      locations: [{ ...createEmptyWCLocation("1"), address: vc?.address || "" }] as WCLocation[],
+
+      officeAdminAnnualSalaries: "",
+      officeAdminNumberOfEmployees: "",
+      manualAnnualSalaries: "",
+      manualNumberOfEmployees: "",
+      employersLiabilityLimit: "",
+
+      agreedToDeclaration: false
+    };
+  });
+
+  const handleWcLocationCountChange = (newNum: number) => {
+    let updated = [...wcForm.locations];
+    if (newNum > updated.length) {
+      for (let i = updated.length; i < newNum; i++) updated.push(createEmptyWCLocation((i + 1).toString()));
+    } else if (newNum < updated.length) {
+      updated = updated.slice(0, newNum);
+    }
+    setWcForm({ ...wcForm, numberOfLocations: newNum, locations: updated });
+  };
+
+  const handleWcLocationChange = (index: number, key: keyof WCLocation, value: any) => {
+    const updated = wcForm.locations.map((loc, idx) => (idx === index ? { ...loc, [key]: value } : loc));
+    setWcForm({ ...wcForm, locations: updated });
+  };
+
+  const handleWcMoneyChange = (key: "officeAdminAnnualSalaries" | "manualAnnualSalaries" | "employersLiabilityLimit", raw: string) => {
+    const clean = raw.replace(/[^0-9]/g, "");
+    setWcForm({ ...wcForm, [key]: clean ? Number(clean).toLocaleString("en-US") : "" });
+  };
+
+  const handleWcLocationMoneyChange = (index: number, raw: string) => {
+    const clean = raw.replace(/[^0-9]/g, "");
+    handleWcLocationChange(index, "limitOfIndemnity", clean ? Number(clean).toLocaleString("en-US") : "");
+  };
+
+  const wcErrors = React.useMemo(() => {
+    const errs: Record<string, string> = {};
+
+    if (!wcForm.companyName.trim()) errs.companyName = "Company Name is required.";
+    if (!wcForm.tradeLicenseNumber.trim()) errs.tradeLicenseNumber = "Trade License Number is required.";
+    if (!wcForm.contactPerson.trim()) errs.contactPerson = "Primary Contact Person is required.";
+    if (!wcForm.contactEmail.trim()) {
+      errs.contactEmail = "Contact Email is required.";
+    } else if (!/\S+@\S+\.\S+/.test(wcForm.contactEmail)) {
+      errs.contactEmail = "Contact Email format is invalid.";
+    }
+    if (!wcForm.contactPhone.trim()) errs.contactPhone = "Contact Phone is required.";
+    if (!wcForm.businessActivity.trim()) errs.businessActivity = "Business Activity is required.";
+    if (!wcForm.businessDescription.trim()) errs.businessDescription = "Business Description is required.";
+
+    wcForm.locations.forEach((loc, idx) => {
+      if (!loc.address.trim()) errs[`location_${idx}_address`] = `Address is required for Location #${idx + 1}.`;
+      if (!loc.limitOfIndemnity.trim()) errs[`location_${idx}_limitOfIndemnity`] = `Limit of Indemnity is required for Location #${idx + 1}.`;
+    });
+
+    if (!wcForm.officeAdminNumberOfEmployees.trim() && !wcForm.manualNumberOfEmployees.trim()) {
+      errs.occupationEmployees = "Enter the number of employees for at least one occupation category.";
+    }
+
+    return errs;
+  }, [wcForm]);
+
   // Offline upload simulator state — kept independently per product tab, so each
   // upload-only cover has its own upload window and file list.
   const [uploadsByProduct, setUploadsByProduct] = useState<Record<number, string[]>>({});
@@ -710,6 +813,8 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
         onCompleteFlow("SME Package Digital Proposal", smeForm);
       } else if (selectedFormType === "PL") {
         onCompleteFlow("Public Liability Digital Proposal", plForm2);
+      } else if (selectedFormType === "WC") {
+        onCompleteFlow("Workmen's Compensation Digital Proposal", wcForm);
       } else {
         onCompleteFlow("Offline Proposal Upload", { uploads: uploadsByProduct });
       }
@@ -891,6 +996,359 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
             </span>
           </label>
         </div>
+      </AccordionSection>
+    </form>
+  );
+
+  // Renders the standalone Workmen's Compensation proposal as a 3-section accordion:
+  // Company Details -> Location Risk Assessment -> Occupation Type.
+  const renderWcForm = () => (
+    <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-4">
+      <AccordionSection index={0} openSection={openSection} setOpenSection={setOpenSection} total={3} title="Company Details" icon={<Building2 size={14} />}>
+        <p className="text-[11px] text-slate-500 -mt-2">Your company details have been pre-filled. Please review and update if needed.</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center">
+              <label className="text-xs font-extrabold text-slate-700">Registered Company Name</label>
+              {isFieldAutoFilled("companyName") && <AutoFillBadge />}
+            </div>
+            <input
+              type="text"
+              value={wcForm.companyName}
+              onChange={(e) => setWcForm({ ...wcForm, companyName: e.target.value })}
+              placeholder="e.g. Acme Gulf Trading LLC"
+              className={`w-full py-3 px-4 rounded-xl text-xs font-bold outline-none transition-all ${
+                isFieldAutoFilled("companyName")
+                  ? "bg-green-50/20 border-2 border-green-300 text-slate-800"
+                  : wcErrors.companyName
+                  ? "bg-white border-2 border-rose-300 text-slate-800 focus:border-rose-500"
+                  : "bg-white border border-slate-200 text-slate-800 focus:border-blue-950"
+              }`}
+            />
+            {wcErrors.companyName && <p className="text-[10px] text-rose-500 font-bold mt-1">{wcErrors.companyName}</p>}
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-extrabold text-slate-700">Trade License Number (Optional)</label>
+            <input
+              type="text"
+              value={wcForm.tradeLicenseNumber}
+              onChange={(e) => setWcForm({ ...wcForm, tradeLicenseNumber: e.target.value })}
+              placeholder="e.g. TL-123456-D"
+              className="w-full bg-white border border-slate-200 py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950 transition-all"
+            />
+          </div>
+
+          <div className="space-y-1.5 sm:col-span-2">
+            <label className="text-xs font-extrabold text-slate-700">Select Business Activity</label>
+            <select
+              value={wcForm.businessActivity}
+              onChange={(e) => setWcForm({ ...wcForm, businessActivity: e.target.value })}
+              className={`w-full py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all cursor-pointer ${
+                wcErrors.businessActivity ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+              }`}
+            >
+              <option value="" disabled>Select business activity...</option>
+              {PL_NATURE_OF_BUSINESS_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+            {wcErrors.businessActivity && <p className="text-[10px] text-rose-500 font-bold mt-1">{wcErrors.businessActivity}</p>}
+            <p className="text-[10px] text-slate-400">Select the option that most closely matches your registered trade license activity.</p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-extrabold text-slate-700">Primary Contact Person</label>
+            <input
+              type="text"
+              value={wcForm.contactPerson}
+              onChange={(e) => setWcForm({ ...wcForm, contactPerson: e.target.value })}
+              placeholder="e.g. Sarah Connor"
+              className={`w-full py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                wcErrors.contactPerson ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+              }`}
+            />
+            {wcErrors.contactPerson && <p className="text-[10px] text-rose-500 font-bold mt-1">{wcErrors.contactPerson}</p>}
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-extrabold text-slate-700">Contact Email Address</label>
+            <input
+              type="email"
+              value={wcForm.contactEmail}
+              onChange={(e) => setWcForm({ ...wcForm, contactEmail: e.target.value })}
+              placeholder="e.g. contact@acmegulf.ae"
+              className={`w-full py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                wcErrors.contactEmail ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+              }`}
+            />
+            {wcErrors.contactEmail && <p className="text-[10px] text-rose-500 font-bold mt-1">{wcErrors.contactEmail}</p>}
+          </div>
+
+          <div className="space-y-1.5 sm:col-span-2">
+            <label className="text-xs font-extrabold text-slate-700">Contact Phone Number</label>
+            <input
+              type="tel"
+              value={wcForm.contactPhone}
+              onChange={(e) => setWcForm({ ...wcForm, contactPhone: e.target.value })}
+              placeholder="e.g. +971 50 123 4567"
+              className={`w-full py-3 px-4 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                wcErrors.contactPhone ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+              }`}
+            />
+            {wcErrors.contactPhone && <p className="text-[10px] text-rose-500 font-bold mt-1">{wcErrors.contactPhone}</p>}
+          </div>
+
+          <div className="space-y-1.5 sm:col-span-2">
+            <div className="flex justify-between items-center">
+              <label className="text-xs font-extrabold text-slate-700">Brief Business Operations Description</label>
+              {isFieldAutoFilled("operationsDescription") && <AutoFillBadge />}
+            </div>
+            <textarea
+              rows={3}
+              maxLength={120}
+              value={wcForm.businessDescription}
+              onChange={(e) => setWcForm({ ...wcForm, businessDescription: e.target.value })}
+              placeholder="Describe your core commercial activities, services, products sold, and general operations"
+              className={`w-full py-3 px-4 rounded-xl text-xs font-bold outline-none transition-all ${
+                isFieldAutoFilled("operationsDescription")
+                  ? "bg-green-50/20 border-2 border-green-300 text-slate-800"
+                  : wcErrors.businessDescription
+                  ? "bg-white border-2 border-rose-300 text-slate-800 focus:border-rose-500"
+                  : "bg-white border border-slate-200 text-slate-800 focus:border-blue-950"
+              }`}
+            />
+            <div className="flex justify-between">
+              <p className="text-[10px] text-slate-400">This information assists underwriter verification of classification codes and risks.</p>
+              <p className="text-[10px] text-slate-400">{wcForm.businessDescription.length}/120</p>
+            </div>
+            {wcErrors.businessDescription && <p className="text-[10px] text-rose-500 font-bold mt-1">{wcErrors.businessDescription}</p>}
+          </div>
+        </div>
+      </AccordionSection>
+
+      <AccordionSection index={1} openSection={openSection} setOpenSection={setOpenSection} total={3} title="Location Risk Assessment" icon={<MapPin size={14} />}>
+        <p className="text-[11px] text-slate-500 -mt-2">
+          Specify risk details and limits required for each business location to be covered under the Workmen's Compensation policy.
+        </p>
+
+        <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="space-y-0.5">
+            <label className="text-xs font-black text-slate-800">Number of Locations to Cover</label>
+            <p className="text-[11px] text-slate-500">Select how many physical corporate addresses require direct coverage.</p>
+          </div>
+          <select
+            value={wcForm.numberOfLocations}
+            onChange={(e) => handleWcLocationCountChange(parseInt(e.target.value, 10))}
+            className="bg-white border border-slate-200 text-slate-800 px-4 py-2 rounded-xl text-xs font-bold outline-none focus:border-blue-950 cursor-pointer w-full sm:w-48"
+          >
+            {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+              <option key={n} value={n}>{n} {n === 1 ? "Location" : "Locations"}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="space-y-6">
+          {wcForm.locations.map((loc, idx) => (
+            <div key={loc.id} className="border border-slate-200 rounded-2xl overflow-hidden bg-white">
+              <div className="bg-slate-50 px-5 py-3 border-b border-slate-200 flex justify-between items-center">
+                <span className="text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+                  <span className="w-5 h-5 flex items-center justify-center rounded-full bg-slate-200 text-slate-700 text-[10px] font-black">{idx + 1}</span>
+                  Location Details
+                </span>
+                {wcForm.numberOfLocations > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => handleWcLocationCountChange(wcForm.numberOfLocations - 1)}
+                    className="text-slate-400 hover:text-rose-500 flex items-center gap-1 text-[11px] font-bold cursor-pointer"
+                  >
+                    <Trash2 size={13} />
+                    <span>Delete</span>
+                  </button>
+                )}
+              </div>
+
+              <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="md:col-span-2 space-y-1.5">
+                  <label className="text-[11px] font-extrabold text-slate-700">Full Physical Address</label>
+                  <input
+                    type="text"
+                    value={loc.address}
+                    onChange={(e) => handleWcLocationChange(idx, "address", e.target.value)}
+                    placeholder="e.g. Unit 401, Level 4, Business Tower, Downtown, Dubai, UAE"
+                    className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                      wcErrors[`location_${idx}_address`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                    }`}
+                  />
+                  {wcErrors[`location_${idx}_address`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{wcErrors[`location_${idx}_address`]}</p>}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-extrabold text-slate-700 flex items-center gap-1.5">
+                    <DollarSign size={13} className="text-slate-400" /> Limit of Indemnity Required (AED)
+                  </label>
+                  <input
+                    type="text"
+                    value={loc.limitOfIndemnity}
+                    onChange={(e) => handleWcLocationMoneyChange(idx, e.target.value)}
+                    placeholder="e.g. 5,000,000"
+                    className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none transition-all ${
+                      wcErrors[`location_${idx}_limitOfIndemnity`] ? "bg-white border-2 border-rose-300 focus:border-rose-500" : "bg-white border border-slate-200 focus:border-blue-950"
+                    }`}
+                  />
+                  {wcErrors[`location_${idx}_limitOfIndemnity`] && <p className="text-[10px] text-rose-500 font-bold mt-1">{wcErrors[`location_${idx}_limitOfIndemnity`]}</p>}
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-extrabold text-slate-700">Location Occupancy Type</label>
+                  <select
+                    value={loc.occupancy}
+                    onChange={(e) => handleWcLocationChange(idx, "occupancy", e.target.value)}
+                    className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950 cursor-pointer"
+                  >
+                    {WC_OCCUPANCY_OPTIONS.map((opt) => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {wcForm.numberOfLocations < 10 && (
+          <div className="flex justify-center pt-2">
+            <button
+              type="button"
+              onClick={() => handleWcLocationCountChange(wcForm.numberOfLocations + 1)}
+              className="flex items-center gap-2 text-xs text-blue-900 font-black px-4 py-2 border border-dashed border-blue-200 rounded-xl hover:border-blue-900 hover:bg-blue-50/40 transition-all cursor-pointer"
+            >
+              <Plus size={15} />
+              <span>Add Another Business Location</span>
+            </button>
+          </div>
+        )}
+      </AccordionSection>
+
+      <AccordionSection
+        index={2}
+        openSection={openSection}
+        setOpenSection={setOpenSection}
+        total={3}
+        title="Occupation Type"
+        icon={<Users size={14} />}
+        lastAction={
+          <button
+            type="submit"
+            disabled={submitting || !wcForm.agreedToDeclaration}
+            className={`font-black text-xs py-3.5 px-8 rounded-xl flex items-center gap-1.5 shadow-md ${
+              !wcForm.agreedToDeclaration || submitting
+                ? "bg-slate-100 text-slate-400 cursor-not-allowed shadow-none"
+                : "bg-yellow-400 hover:bg-yellow-500 text-blue-950 shadow-yellow-400/10 cursor-pointer"
+            }`}
+          >
+            {submitting ? <Loader2 size={14} className="animate-spin" /> : <Award size={14} />}
+            <span>Submit Workmen's Compensation Application</span>
+          </button>
+        }
+      >
+        <p className="text-[11px] text-slate-500 -mt-2">
+          Covers, deductibles, extensions & limits of liability — declare total annual salaries and headcount for each occupation category.
+        </p>
+
+        <div className="border border-slate-200 rounded-2xl overflow-hidden">
+          <div className="bg-blue-900 text-white px-4 py-2.5 text-[10px] font-black uppercase tracking-widest">
+            Workmen's Compensation and Employer's Liability
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200">
+                  <th className="text-left font-black text-slate-500 uppercase tracking-wider text-[10px] px-4 py-2.5">Occupation</th>
+                  <th className="text-left font-black text-slate-500 uppercase tracking-wider text-[10px] px-4 py-2.5">Annual Salaries (AED)</th>
+                  <th className="text-left font-black text-slate-500 uppercase tracking-wider text-[10px] px-4 py-2.5">No. Employees</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-slate-100">
+                  <td className="px-4 py-3 font-bold text-slate-700 align-top">
+                    Office / Admin
+                    <p className="text-[10px] font-medium text-slate-400 mt-0.5">e.g. Education / Health / Personal Services - low hazard</p>
+                  </td>
+                  <td className="px-4 py-3">
+                    <input
+                      type="text"
+                      value={wcForm.officeAdminAnnualSalaries}
+                      onChange={(e) => handleWcMoneyChange("officeAdminAnnualSalaries", e.target.value)}
+                      placeholder="e.g. 125,400"
+                      className="w-full bg-white border border-slate-200 py-2 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950"
+                    />
+                  </td>
+                  <td className="px-4 py-3">
+                    <input
+                      type="number"
+                      min={0}
+                      value={wcForm.officeAdminNumberOfEmployees}
+                      onChange={(e) => setWcForm({ ...wcForm, officeAdminNumberOfEmployees: e.target.value })}
+                      placeholder="e.g. 4"
+                      className="w-full bg-white border border-slate-200 py-2 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950"
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <td className="px-4 py-3 font-bold text-slate-700 align-top">
+                    Manual
+                    <p className="text-[10px] font-medium text-slate-400 mt-0.5">e.g. Food and Beverage, Retail, Landscaping, Drivers, Security Guards</p>
+                  </td>
+                  <td className="px-4 py-3">
+                    <input
+                      type="text"
+                      value={wcForm.manualAnnualSalaries}
+                      onChange={(e) => handleWcMoneyChange("manualAnnualSalaries", e.target.value)}
+                      placeholder="e.g. 349,200"
+                      className="w-full bg-white border border-slate-200 py-2 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950"
+                    />
+                  </td>
+                  <td className="px-4 py-3">
+                    <input
+                      type="number"
+                      min={0}
+                      value={wcForm.manualNumberOfEmployees}
+                      onChange={(e) => setWcForm({ ...wcForm, manualNumberOfEmployees: e.target.value })}
+                      placeholder="e.g. 21"
+                      className="w-full bg-white border border-slate-200 py-2 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950"
+                    />
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        {wcErrors.occupationEmployees && <p className="text-[10px] text-rose-500 font-bold">{wcErrors.occupationEmployees}</p>}
+
+        <div className="space-y-1.5 max-w-sm">
+          <label className="text-xs font-extrabold text-slate-700">Employer's Liability Limit (AED)</label>
+          <input
+            type="text"
+            value={wcForm.employersLiabilityLimit}
+            onChange={(e) => handleWcMoneyChange("employersLiabilityLimit", e.target.value)}
+            placeholder="e.g. 1,000,000"
+            className="w-full bg-white border border-slate-200 py-2.5 px-3 rounded-xl text-xs font-bold text-slate-800 outline-none focus:border-blue-950"
+          />
+        </div>
+
+        <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs text-slate-600 leading-relaxed">
+          <p className="font-bold text-slate-800 mb-1.5">Declaration and Legal Binding Statement:</p>
+          I hereby declare that the particulars and answers given in this digital proposal are true, accurate, and complete, and that no material facts have been withheld or omitted. I agree that this proposal form shall be the basis of the contract between the company and the underwriters.
+        </div>
+
+        <label className="flex items-start gap-3 cursor-pointer select-none">
+          <input type="checkbox" checked={wcForm.agreedToDeclaration} onChange={(e) => setWcForm({ ...wcForm, agreedToDeclaration: e.target.checked })}
+            className="w-4 h-4 rounded border-slate-200 mt-0.5 text-blue-900 focus:ring-blue-900 cursor-pointer" />
+          <span className="text-xs font-extrabold text-slate-800">
+            I accept the declaration and authorize corporate tender sourcing.
+          </span>
+        </label>
       </AccordionSection>
     </form>
   );
@@ -1668,6 +2126,9 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
 
           {/* ======================= FORM 2: PUBLIC LIABILITY (replicates the D&O proposal layout) ======================= */}
           {selectedFormType === "PL" && renderEntityForm(plForm2, setPlForm2, "Submit Public Liability Application")}
+
+          {/* ======================= FORM: WORKMEN'S COMPENSATION PROPOSAL FORM ======================= */}
+          {selectedFormType === "WC" && renderWcForm()}
 
           {/* Legacy detailed Public Liability form — retained but disabled in favour of the D&O-style accordion above. */}
           {false && selectedFormType === "PL" && (
