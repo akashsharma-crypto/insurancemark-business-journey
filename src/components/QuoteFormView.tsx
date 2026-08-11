@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { InsuranceProduct, LeadFormState, VerifiedCompany } from "../types";
+import { InsuranceProduct, LeadFormState } from "../types";
 import { PRODUCT_DETAILS_MAP } from "../data/products";
 import { getBusinessIcon } from "../data/businessIcons";
 import { PRODUCT_CATEGORIES } from "./MultiSelectView";
 import { JourneyStepper } from "./JourneyStepper";
 import {
   ArrowLeft, Building2, Phone,
-  User, Mail, Smartphone, CheckCircle, Search, AlertCircle, Loader2, ArrowRight,
-  Plus, Check, MapPin, AlignLeft, Info, X
+  User, Mail, Smartphone, Loader2, ArrowRight,
+  Plus, Check, MapPin, AlignLeft, X
 } from "lucide-react";
 
 interface QuoteFormViewProps {
@@ -75,10 +75,7 @@ export const QuoteFormView: React.FC<QuoteFormViewProps> = ({
 
   // UI state managers
   const [showAllProductsModal, setShowAllProductsModal] = useState(false);
-  const [loadingVerify, setLoadingVerify] = useState(false);
-  const [verifyError, setVerifyError] = useState<string | null>(null);
-  const [verifiedRecord, setVerifiedRecord] = useState<VerifiedCompany | null>(null);
-  const [showVerifiedBadge, setShowVerifiedBadge] = useState(false);
+  const [receivePromotions, setReceivePromotions] = useState(true);
 
   // Validation and submit states
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -89,117 +86,15 @@ export const QuoteFormView: React.FC<QuoteFormViewProps> = ({
     setForm(prev => ({ ...prev, selectedProducts: preselectedProducts }));
   }, [preselectedProducts]);
 
-  // Company verification lookup
-  const handleVerify = async () => {
-    if (!form.companyName.trim()) {
-      setVerifyError("Please enter a company name or trade license number first.");
-      return;
-    }
-
-    setLoadingVerify(true);
-    setVerifyError(null);
-    setVerifiedRecord(null);
-
-    try {
-      const response = await fetch("/api/verify-company", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ companyName: form.companyName }),
-      });
-
-      if (!response.ok) {
-        const errData = await response.json();
-        throw new Error(errData.error || "Could not verify this company right now.");
-      }
-
-      const data: VerifiedCompany = await response.json();
-      setVerifiedRecord(data);
-    } catch (err: any) {
-      console.error(err);
-      setVerifyError(err.message || "Verification is temporarily unavailable. Please fill in your details manually.");
-    } finally {
-      setLoadingVerify(false);
-    }
-  };
-
-  // Pre-fill triggered by user upon confirming verified results
-  const handleAcceptPrefill = () => {
-    if (!verifiedRecord) return;
-
-    // Smart-map activities from verified results to our activity dropdown
-    let matchedActivity = "IT, Tech & Software Development";
-    if (verifiedRecord.activities && verifiedRecord.activities.length > 0) {
-      const primaryAct = verifiedRecord.activities[0].toLowerCase();
-      if (primaryAct.includes("insurance")) {
-        matchedActivity = "Management / Business Consultancy";
-      } else if (primaryAct.includes("tech") || primaryAct.includes("software") || primaryAct.includes("computer")) {
-        matchedActivity = "IT, Tech & Software Development";
-      } else if (primaryAct.includes("restaurant") || primaryAct.includes("cafe") || primaryAct.includes("catering") || primaryAct.includes("food")) {
-        matchedActivity = "Restaurant / Cafe / Food Business";
-      } else if (primaryAct.includes("construction") || primaryAct.includes("contracting") || primaryAct.includes("building")) {
-        matchedActivity = "Construction, Civil & Engineering";
-      } else if (primaryAct.includes("clinic") || primaryAct.includes("medical") || primaryAct.includes("hospital")) {
-        matchedActivity = "Medical Clinic / Healthcare";
-      } else if (primaryAct.includes("trading") || primaryAct.includes("shop") || primaryAct.includes("retail") || primaryAct.includes("e-commerce")) {
-        matchedActivity = "Retail Shop / Trading / E-commerce";
-      } else if (primaryAct.includes("brokerage") || primaryAct.includes("real estate") || primaryAct.includes("property")) {
-        matchedActivity = "Real Estate & Agencies";
-      } else if (primaryAct.includes("consult") || primaryAct.includes("management")) {
-        matchedActivity = "Management / Business Consultancy";
-      } else if (primaryAct.includes("logistics") || primaryAct.includes("freight") || primaryAct.includes("shipping") || primaryAct.includes("warehouse")) {
-        matchedActivity = "Logistics, Shipping & Warehousing";
-      } else if (primaryAct.includes("salon") || primaryAct.includes("spa") || primaryAct.includes("beauty")) {
-        matchedActivity = "Beauty Salon / Spa";
-      } else if (primaryAct.includes("school") || primaryAct.includes("education") || primaryAct.includes("training")) {
-        matchedActivity = "General Education / Training School";
-      }
-    }
-
-    setForm(prev => ({
-      ...prev,
-      companyName: verifiedRecord.companyName,
-      tradeLicense: verifiedRecord.tradeLicenseNumber,
-      companyLandline: verifiedRecord.landline,
-      emirate: "Dubai",
-      businessActivity: matchedActivity,
-      businessDescription: `We operate as a verified ${verifiedRecord.licenseType} registered with ${verifiedRecord.authority}. Official registered activities include: ${verifiedRecord.activities?.join(", ") || "Corporate commercial trade"}.`,
-      verifiedCompany: verifiedRecord
-    }));
-
-    setShowVerifiedBadge(true);
-    setVerifiedRecord(null); // Close preview card after prefilling
-
-    // Clear field-specific validation errors for the auto-filled fields
-    setErrors(prev => {
-      const newErrors = { ...prev };
-      delete newErrors.companyName;
-      delete newErrors.tradeLicense;
-      delete newErrors.companyLandline;
-      return newErrors;
-    });
-  };
-
   // Form input change handlers
   const handleInputChange = (field: keyof LeadFormState, value: any) => {
-    setForm(prev => {
-      const updated = { ...prev, [field]: value };
-      if (["companyName", "tradeLicense", "companyLandline"].includes(field)) {
-        delete updated.verifiedCompany;
-      }
-      return updated;
-    });
+    setForm(prev => ({ ...prev, [field]: value }));
     if (errors[field]) {
       setErrors(prev => {
         const newErrors = { ...prev };
         delete newErrors[field];
         return newErrors;
       });
-    }
-    // Remove verified badge if they modify the corporate fields
-    if (["companyName", "tradeLicense", "companyLandline"].includes(field)) {
-      setShowVerifiedBadge(false);
     }
   };
 
@@ -299,155 +194,114 @@ export const QuoteFormView: React.FC<QuoteFormViewProps> = ({
         {/* Single column form */}
         <form onSubmit={handleSubmit} className="max-w-4xl mx-auto bg-white border border-slate-200/80 rounded-3xl p-6 sm:p-10 shadow-xl space-y-8">
 
-          {/* Title Block */}
-          <div className="space-y-1">
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-              Tell Us About You And Your Business
-            </h1>
-          </div>
-
-          {/* PART 1: Company Credentials form section */}
+          {/* SECTION 1: Tell Us About You And Your Business (contact + company, no search) */}
           <div className="space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-              <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-1.5">
-                <span className="w-1.5 h-3 bg-blue-900 rounded-sm"></span>
-                Company Credentials
-              </h3>
-              {showVerifiedBadge && (
-                <span className="bg-blue-50 text-blue-900 text-[10px] font-black px-3 py-1 rounded-full border border-blue-100 flex items-center gap-1.5">
-                  <CheckCircle size={11} className="fill-blue-900 text-white" />
-                  <span>Verified</span>
-                </span>
-              )}
+            <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
+              <img src="/assets/alfred-mascot.png" alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
+              <h1 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight">
+                Tell Us About You And Your Business
+              </h1>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              {/* Company Name (with inline verify) */}
-              <div id="field-companyName" className="space-y-1.5 sm:col-span-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              {/* Contact Name */}
+              <div id="field-contactName" className="space-y-1.5">
                 <label className="text-xs font-extrabold text-slate-700 flex items-center gap-1">
-                  <span>Company Trade Name</span>
+                  <span>Contact person full name</span>
                   <span className="text-red-500">*</span>
                 </label>
-                <div className="flex flex-col sm:flex-row gap-2.5">
-                  <div className="relative flex-1">
-                    <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
-                    <input
-                      type="text"
-                      value={form.companyName}
-                      onChange={(e) => handleInputChange("companyName", e.target.value)}
-                      placeholder="Company name as per trade license"
-                      className={`w-full bg-white border ${errors.companyName ? "border-red-400 focus:ring-red-400" : "border-slate-200 focus:ring-blue-900"} py-3 pl-10 pr-4 rounded-xl text-xs focus:outline-none focus:ring-2 font-semibold`}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleVerify}
-                    disabled={loadingVerify || !form.companyName.trim()}
-                    className={`py-3 px-5 rounded-xl text-xs font-black flex items-center justify-center gap-2 transition-all duration-150 whitespace-nowrap shrink-0 ${
-                      !form.companyName.trim()
-                        ? "bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200/60"
-                        : "bg-slate-900 hover:bg-slate-800 text-white cursor-pointer"
-                    }`}
-                  >
-                    {loadingVerify ? (
-                      <>
-                        <Loader2 size={14} className="animate-spin" />
-                        <span>Searching...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Search size={14} />
-                        <span>Search</span>
-                      </>
-                    )}
-                  </button>
+                <div className="relative">
+                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                  <input
+                    type="text"
+                    value={form.contactName}
+                    onChange={(e) => handleInputChange("contactName", e.target.value)}
+                    placeholder="e.g. Salim Al Mansoori"
+                    className={`w-full bg-white border ${errors.contactName ? "border-red-400 focus:ring-red-400" : "border-slate-200 focus:ring-blue-900"} py-3 pl-10 pr-4 rounded-xl text-xs focus:outline-none focus:ring-2 font-semibold`}
+                  />
                 </div>
-                {errors.companyName && <p className="text-[10px] text-red-500 font-bold">{errors.companyName}</p>}
-
-                {/* Verification error */}
-                {verifyError && (
-                  <div className="flex items-start gap-2 text-red-600 text-[11px] font-bold bg-red-50 p-3 rounded-xl border border-red-100 mt-2">
-                    <AlertCircle size={14} className="shrink-0 mt-0.5" />
-                    <span>{verifyError}</span>
-                  </div>
+                {errors.contactName ? (
+                  <p className="text-[10px] text-red-500 font-bold">{errors.contactName}</p>
+                ) : (
+                  <p className="text-[10px] text-slate-400 font-medium">Enter the name of the person we should speak to about your insurance</p>
                 )}
+              </div>
 
-                {/* Verification result preview card */}
-                {verifiedRecord && (
-                  <div className={`p-4 rounded-2xl mt-2 animate-in fade-in slide-in-from-top-2 duration-200 border ${
-                    verifiedRecord.isRealMatch ? "bg-slate-50 border-slate-200" : "bg-amber-50 border-amber-200"
-                  }`}>
-                    {verifiedRecord.isRealMatch ? (
-                      <h4 className="text-xs font-black text-slate-900 mb-3">
-                        We found a registration match — use these details?
-                      </h4>
-                    ) : (
-                      <div className="flex items-start gap-2 mb-3">
-                        <AlertCircle size={14} className="shrink-0 mt-0.5 text-amber-600" />
-                        <div>
-                          <h4 className="text-xs font-black text-amber-900">
-                            Unverified suggestion — please confirm before using
-                          </h4>
-                          <p className="text-[11px] font-semibold text-amber-700 mt-0.5">
-                            {verifiedRecord.verificationNote || "We couldn't confirm this against the official registry. These details were AI-generated and may be inaccurate."}
-                          </p>
-                        </div>
-                      </div>
-                    )}
+              {/* Email Address */}
+              <div id="field-contactEmail" className="space-y-1.5">
+                <label className="text-xs font-extrabold text-slate-700 flex items-center gap-1">
+                  <span>Email address</span>
+                  <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                  <input
+                    type="email"
+                    value={form.contactEmail}
+                    onChange={(e) => handleInputChange("contactEmail", e.target.value)}
+                    placeholder="e.g. contact@firm.ae"
+                    className={`w-full bg-white border ${errors.contactEmail ? "border-red-400 focus:ring-red-400" : "border-slate-200 focus:ring-blue-900"} py-3 pl-10 pr-4 rounded-xl text-xs focus:outline-none focus:ring-2 font-semibold`}
+                  />
+                </div>
+                {errors.contactEmail ? (
+                  <p className="text-[10px] text-red-500 font-bold">{errors.contactEmail}</p>
+                ) : (
+                  <p className="text-[10px] text-slate-400 font-medium">We will email your quotes and policy documents here</p>
+                )}
+              </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-3 gap-x-6 text-xs text-slate-600 border-b border-slate-200 pb-3 mb-3">
-                      <div>
-                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Company Name</span>
-                        <span className="font-extrabold text-slate-900">{verifiedRecord.companyName}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">License Number</span>
-                        <span className="font-mono font-black text-slate-900">{verifiedRecord.tradeLicenseNumber}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Landline</span>
-                        <span className="font-extrabold text-slate-900">{verifiedRecord.landline}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Activities</span>
-                        <span className="font-semibold text-slate-800 line-clamp-1">{verifiedRecord.activities?.join(", ")}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Authority</span>
-                        <span className="font-extrabold text-slate-900">{verifiedRecord.authority}</span>
-                      </div>
-                      <div>
-                        <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">Expiry Date</span>
-                        <span className="font-semibold text-slate-700">{verifiedRecord.expiryDate}</span>
-                      </div>
-                    </div>
+              {/* Mobile Number */}
+              <div id="field-contactMobile" className="space-y-1.5">
+                <label className="text-xs font-extrabold text-slate-700 flex items-center gap-1">
+                  <span>Mobile number</span>
+                  <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <Smartphone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                  <input
+                    type="text"
+                    value={form.contactMobile}
+                    onChange={(e) => handleInputChange("contactMobile", e.target.value)}
+                    placeholder="e.g. +971 50 123 4567"
+                    className={`w-full bg-white border ${errors.contactMobile ? "border-red-400 focus:ring-red-400" : "border-slate-200 focus:ring-blue-900"} py-3 pl-10 pr-4 rounded-xl text-xs focus:outline-none focus:ring-2 font-semibold`}
+                  />
+                </div>
+                {errors.contactMobile ? (
+                  <p className="text-[10px] text-red-500 font-bold">{errors.contactMobile}</p>
+                ) : (
+                  <p className="text-[10px] text-slate-400 font-medium">We will only use this to discuss your quotes and policies</p>
+                )}
+              </div>
+            </div>
 
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setVerifiedRecord(null)}
-                        className="flex-1 sm:flex-none border border-slate-200 text-slate-500 hover:bg-white py-2 px-4 rounded-xl text-xs font-bold cursor-pointer"
-                      >
-                        Decline
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleAcceptPrefill}
-                        className={`flex-1 sm:flex-none py-2 px-5 rounded-xl text-xs font-black cursor-pointer text-white ${
-                          verifiedRecord.isRealMatch ? "bg-blue-900 hover:bg-blue-800" : "bg-amber-600 hover:bg-amber-700"
-                        }`}
-                      >
-                        {verifiedRecord.isRealMatch ? "Use These Details" : "Use as Draft (Unverified)"}
-                      </button>
-                    </div>
-                  </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              {/* Company Name */}
+              <div id="field-companyName" className="space-y-1.5">
+                <label className="text-xs font-extrabold text-slate-700 flex items-center gap-1">
+                  <span>Company name</span>
+                  <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                  <input
+                    type="text"
+                    value={form.companyName}
+                    onChange={(e) => handleInputChange("companyName", e.target.value)}
+                    placeholder="Company name as per trade license"
+                    className={`w-full bg-white border ${errors.companyName ? "border-red-400 focus:ring-red-400" : "border-slate-200 focus:ring-blue-900"} py-3 pl-10 pr-4 rounded-xl text-xs focus:outline-none focus:ring-2 font-semibold`}
+                  />
+                </div>
+                {errors.companyName ? (
+                  <p className="text-[10px] text-red-500 font-bold">{errors.companyName}</p>
+                ) : (
+                  <p className="text-[10px] text-slate-400 font-medium">Enter the full legal name as shown on your trade license</p>
                 )}
               </div>
 
               {/* Company Landline */}
               <div id="field-companyLandline" className="space-y-1.5">
                 <label className="text-xs font-extrabold text-slate-700 flex items-center gap-1">
-                  <span>Company Landline Number</span>
+                  <span>Company landline number</span>
                   <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -466,7 +320,7 @@ export const QuoteFormView: React.FC<QuoteFormViewProps> = ({
               {/* Emirate on Trade License */}
               <div id="field-emirate" className="space-y-1.5">
                 <label className="text-xs font-extrabold text-slate-700 flex items-center gap-1">
-                  <span>Emirate on Trade License</span>
+                  <span>Emirate on trade license</span>
                   <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
@@ -485,29 +339,44 @@ export const QuoteFormView: React.FC<QuoteFormViewProps> = ({
                     <option value="Fujairah">Fujairah</option>
                   </select>
                 </div>
+                <p className="text-[10px] text-slate-400 font-medium">Select the Emirate where your company is registered on its trade license and/or main branch.</p>
               </div>
             </div>
           </div>
 
-          {/* PART 2: Business details and activity */}
+          {/* SECTION 2: Help Us Understand Your Business */}
           <div className="space-y-5 border-t border-slate-100 pt-6">
-            <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-1.5">
-              <span className="w-1.5 h-3 bg-blue-900 rounded-sm"></span>
-              Help Us Understand Your Business
-            </h3>
+            <div className="flex items-center gap-3">
+              <img src="/assets/alfred-mascot.png" alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
+              <div>
+                <h3 className="text-base font-black text-slate-900">Help Us Understand Your Business</h3>
+                <p className="text-xs text-slate-500 font-medium">This helps us recommend suitable business insurance covers for your company.</p>
+              </div>
+            </div>
 
-            <div className="space-y-5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+              {/* Tell us about business description */}
+              <div id="field-businessDescription" className="sm:col-span-2 space-y-1.5">
+                <label className="text-xs font-extrabold text-slate-700 flex items-center gap-1">
+                  <span>Tell us about your business</span>
+                </label>
+                <div className="relative">
+                  <AlignLeft className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
+                  <input
+                    type="text"
+                    value={form.businessDescription}
+                    onChange={(e) => handleInputChange("businessDescription", e.target.value)}
+                    placeholder="Briefly describe what your business does, where you operate, and how many staff you have (e.g. IT consultancy in Dubai with 15 staff working from one office)"
+                    className="w-full bg-white border border-slate-200 py-3 pl-10 pr-4 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-900"
+                  />
+                </div>
+              </div>
+
               {/* Select Trade License Activity */}
               <div id="field-businessActivity" className="space-y-1.5">
-                <label className="text-xs font-extrabold text-slate-700 flex items-center justify-between">
-                  <span className="flex items-center gap-1">
-                    <span>Select Activity Closest to your Trade License</span>
-                    <span className="text-red-500">*</span>
-                  </span>
-                  <span className="text-[10px] text-blue-900 font-extrabold flex items-center gap-1">
-                    <Info size={11} />
-                    <span>Updates recommendations</span>
-                  </span>
+                <label className="text-xs font-extrabold text-slate-700 flex items-center gap-1">
+                  <span>Select the activity closest to your trade license</span>
+                  <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
@@ -524,92 +393,11 @@ export const QuoteFormView: React.FC<QuoteFormViewProps> = ({
                     ))}
                   </select>
                 </div>
-                {errors.businessActivity && <p className="text-[10px] text-red-500 font-bold">{errors.businessActivity}</p>}
-              </div>
-
-              {/* Tell us about business description */}
-              <div id="field-businessDescription" className="space-y-1.5">
-                <label className="text-xs font-extrabold text-slate-700 flex items-center gap-1">
-                  <span>Tell us about your business</span>
-                  <span className="text-slate-400 font-bold text-[10px]">(Optional)</span>
-                </label>
-                <div className="relative">
-                  <AlignLeft className="absolute left-3.5 top-3.5 text-slate-400" size={15} />
-                  <textarea
-                    rows={3}
-                    value={form.businessDescription}
-                    onChange={(e) => handleInputChange("businessDescription", e.target.value)}
-                    placeholder="Briefly describe what your company does (e.g. tech support, coffee shop trading, apartment renting, construction works)"
-                    className="w-full bg-white border border-slate-200 py-3 pl-10 pr-4 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-900 resize-none"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* PART 3: Primary Contact Person */}
-          <div className="space-y-5 border-t border-slate-100 pt-6">
-            <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest flex items-center gap-1.5">
-              <span className="w-1.5 h-3 bg-blue-900 rounded-sm"></span>
-              Primary Representative details
-            </h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-              {/* Contact Name */}
-              <div id="field-contactName" className="space-y-1.5">
-                <label className="text-xs font-extrabold text-slate-700 flex items-center gap-1">
-                  <span>Full Name</span>
-                  <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
-                  <input
-                    type="text"
-                    value={form.contactName}
-                    onChange={(e) => handleInputChange("contactName", e.target.value)}
-                    placeholder="e.g. Salim Al Mansoori"
-                    className={`w-full bg-white border ${errors.contactName ? "border-red-400 focus:ring-red-400" : "border-slate-200 focus:ring-blue-900"} py-3 pl-10 pr-4 rounded-xl text-xs focus:outline-none focus:ring-2 font-semibold`}
-                  />
-                </div>
-                {errors.contactName && <p className="text-[10px] text-red-500 font-bold">{errors.contactName}</p>}
-              </div>
-
-              {/* Email Address */}
-              <div id="field-contactEmail" className="space-y-1.5">
-                <label className="text-xs font-extrabold text-slate-700 flex items-center gap-1">
-                  <span>Email Address</span>
-                  <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
-                  <input
-                    type="email"
-                    value={form.contactEmail}
-                    onChange={(e) => handleInputChange("contactEmail", e.target.value)}
-                    placeholder="e.g. contact@firm.ae"
-                    className={`w-full bg-white border ${errors.contactEmail ? "border-red-400 focus:ring-red-400" : "border-slate-200 focus:ring-blue-900"} py-3 pl-10 pr-4 rounded-xl text-xs focus:outline-none focus:ring-2 font-semibold`}
-                  />
-                </div>
-                {errors.contactEmail && <p className="text-[10px] text-red-500 font-bold">{errors.contactEmail}</p>}
-              </div>
-
-              {/* Mobile Number */}
-              <div id="field-contactMobile" className="space-y-1.5">
-                <label className="text-xs font-extrabold text-slate-700 flex items-center gap-1">
-                  <span>Mobile Number</span>
-                  <span className="text-red-500">*</span>
-                </label>
-                <div className="relative">
-                  <Smartphone className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={15} />
-                  <input
-                    type="text"
-                    value={form.contactMobile}
-                    onChange={(e) => handleInputChange("contactMobile", e.target.value)}
-                    placeholder="e.g. +971 50 123 4567"
-                    className={`w-full bg-white border ${errors.contactMobile ? "border-red-400 focus:ring-red-400" : "border-slate-200 focus:ring-blue-900"} py-3 pl-10 pr-4 rounded-xl text-xs focus:outline-none focus:ring-2 font-semibold`}
-                  />
-                </div>
-                {errors.contactMobile && <p className="text-[10px] text-red-500 font-bold">{errors.contactMobile}</p>}
+                {errors.businessActivity ? (
+                  <p className="text-[10px] text-red-500 font-bold">{errors.businessActivity}</p>
+                ) : (
+                  <p className="text-[10px] text-slate-400 font-medium">Choose the activity that best matches the description on your trade license</p>
+                )}
               </div>
             </div>
           </div>
@@ -718,29 +506,46 @@ export const QuoteFormView: React.FC<QuoteFormViewProps> = ({
           </div>
 
           {/* Core Submit row */}
-          <div className="pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-end gap-4">
+          <div className="pt-6 border-t border-slate-100 space-y-4">
+            <label className="flex items-start gap-2.5 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={receivePromotions}
+                onChange={(e) => setReceivePromotions(e.target.checked)}
+                className="w-4 h-4 rounded border-slate-300 mt-0.5 text-blue-900 focus:ring-blue-900 cursor-pointer"
+              />
+              <span className="text-xs font-semibold text-slate-600">
+                I would like to receive promotions and offers from InsuranceMarket.ae
+              </span>
+            </label>
 
-            <button
-              type="submit"
-              disabled={submitting}
-              className={`w-full sm:w-auto font-black text-xs py-4 px-10 rounded-2xl flex items-center justify-center gap-2 transition-all duration-150 shadow-lg ${
-                submitting
-                  ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
-                  : "bg-yellow-400 hover:bg-yellow-500 text-blue-950 shadow-yellow-400/10 cursor-pointer"
-              }`}
-            >
-              {submitting ? (
-                <>
-                  <Loader2 size={15} className="animate-spin" />
-                  <span>Creating Corporate File...</span>
-                </>
-              ) : (
-                <>
-                  <span>Proceed to Coverage Options</span>
-                  <ArrowRight size={15} />
-                </>
-              )}
-            </button>
+            <div className="flex flex-col sm:flex-row items-center justify-end gap-4">
+              <button
+                type="submit"
+                disabled={submitting}
+                className={`w-full sm:w-auto font-black text-xs py-4 px-10 rounded-2xl flex items-center justify-center gap-2 transition-all duration-150 shadow-lg ${
+                  submitting
+                    ? "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"
+                    : "bg-yellow-400 hover:bg-yellow-500 text-blue-950 shadow-yellow-400/10 cursor-pointer"
+                }`}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 size={15} className="animate-spin" />
+                    <span>Please wait...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Next step</span>
+                    <ArrowRight size={15} />
+                  </>
+                )}
+              </button>
+            </div>
+
+            <p className="text-[10px] text-slate-400 font-medium text-center sm:text-right">
+              By submitting this form you agree to InsuranceMarket.ae's privacy policy and terms &amp; conditions.
+            </p>
           </div>
 
         </form>
