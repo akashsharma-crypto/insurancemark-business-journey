@@ -220,11 +220,7 @@ export const QuoteFormView: React.FC<QuoteFormViewProps> = ({
                     className={`w-full bg-white border ${errors.contactName ? "border-red-400 focus:ring-red-400" : "border-slate-200 focus:ring-blue-900"} py-3 pl-10 pr-4 rounded-xl text-xs focus:outline-none focus:ring-2 font-semibold`}
                   />
                 </div>
-                {errors.contactName ? (
-                  <p className="text-[10px] text-red-500 font-bold">{errors.contactName}</p>
-                ) : (
-                  <p className="text-[10px] text-slate-400 font-medium">Enter the name of the person we should speak to about your insurance</p>
-                )}
+                {errors.contactName && <p className="text-[10px] text-red-500 font-bold">{errors.contactName}</p>}
               </div>
 
               {/* Email Address */}
@@ -243,11 +239,7 @@ export const QuoteFormView: React.FC<QuoteFormViewProps> = ({
                     className={`w-full bg-white border ${errors.contactEmail ? "border-red-400 focus:ring-red-400" : "border-slate-200 focus:ring-blue-900"} py-3 pl-10 pr-4 rounded-xl text-xs focus:outline-none focus:ring-2 font-semibold`}
                   />
                 </div>
-                {errors.contactEmail ? (
-                  <p className="text-[10px] text-red-500 font-bold">{errors.contactEmail}</p>
-                ) : (
-                  <p className="text-[10px] text-slate-400 font-medium">We will email your quotes and policy documents here</p>
-                )}
+                {errors.contactEmail && <p className="text-[10px] text-red-500 font-bold">{errors.contactEmail}</p>}
               </div>
 
               {/* Mobile Number */}
@@ -266,11 +258,7 @@ export const QuoteFormView: React.FC<QuoteFormViewProps> = ({
                     className={`w-full bg-white border ${errors.contactMobile ? "border-red-400 focus:ring-red-400" : "border-slate-200 focus:ring-blue-900"} py-3 pl-10 pr-4 rounded-xl text-xs focus:outline-none focus:ring-2 font-semibold`}
                   />
                 </div>
-                {errors.contactMobile ? (
-                  <p className="text-[10px] text-red-500 font-bold">{errors.contactMobile}</p>
-                ) : (
-                  <p className="text-[10px] text-slate-400 font-medium">We will only use this to discuss your quotes and policies</p>
-                )}
+                {errors.contactMobile && <p className="text-[10px] text-red-500 font-bold">{errors.contactMobile}</p>}
               </div>
             </div>
 
@@ -291,11 +279,7 @@ export const QuoteFormView: React.FC<QuoteFormViewProps> = ({
                     className={`w-full bg-white border ${errors.companyName ? "border-red-400 focus:ring-red-400" : "border-slate-200 focus:ring-blue-900"} py-3 pl-10 pr-4 rounded-xl text-xs focus:outline-none focus:ring-2 font-semibold`}
                   />
                 </div>
-                {errors.companyName ? (
-                  <p className="text-[10px] text-red-500 font-bold">{errors.companyName}</p>
-                ) : (
-                  <p className="text-[10px] text-slate-400 font-medium">Enter the full legal name as shown on your trade license</p>
-                )}
+                {errors.companyName && <p className="text-[10px] text-red-500 font-bold">{errors.companyName}</p>}
               </div>
 
               {/* Company Landline */}
@@ -339,7 +323,6 @@ export const QuoteFormView: React.FC<QuoteFormViewProps> = ({
                     <option value="Fujairah">Fujairah</option>
                   </select>
                 </div>
-                <p className="text-[10px] text-slate-400 font-medium">Select the Emirate where your company is registered on its trade license and/or main branch.</p>
               </div>
             </div>
           </div>
@@ -348,10 +331,7 @@ export const QuoteFormView: React.FC<QuoteFormViewProps> = ({
           <div className="space-y-5 border-t border-slate-100 pt-6">
             <div className="flex items-center gap-3">
               <img src="/assets/alfred-mascot.png" alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
-              <div>
-                <h3 className="text-base font-black text-slate-900">Help Us Understand Your Business</h3>
-                <p className="text-xs text-slate-500 font-medium">This helps us recommend suitable business insurance covers for your company.</p>
-              </div>
+              <h3 className="text-base font-black text-slate-900">Help Us Understand Your Business</h3>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
@@ -393,11 +373,7 @@ export const QuoteFormView: React.FC<QuoteFormViewProps> = ({
                     ))}
                   </select>
                 </div>
-                {errors.businessActivity ? (
-                  <p className="text-[10px] text-red-500 font-bold">{errors.businessActivity}</p>
-                ) : (
-                  <p className="text-[10px] text-slate-400 font-medium">Choose the activity that best matches the description on your trade license</p>
-                )}
+                {errors.businessActivity && <p className="text-[10px] text-red-500 font-bold">{errors.businessActivity}</p>}
               </div>
             </div>
           </div>

@@ -1005,7 +1005,6 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
   const renderWcForm = () => (
     <form onSubmit={handleSubmit} className="p-6 sm:p-10 space-y-4">
       <AccordionSection index={0} openSection={openSection} setOpenSection={setOpenSection} total={3} title="Company Details" icon={<Building2 size={14} />}>
-        <p className="text-[11px] text-slate-500 -mt-2">Your company details have been pre-filled. Please review and update if needed.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
@@ -1054,7 +1053,6 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
               ))}
             </select>
             {wcErrors.businessActivity && <p className="text-[10px] text-rose-500 font-bold mt-1">{wcErrors.businessActivity}</p>}
-            <p className="text-[10px] text-slate-400">Select the option that most closely matches your registered trade license activity.</p>
           </div>
 
           <div className="space-y-1.5">
@@ -1118,25 +1116,15 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
                   : "bg-white border border-slate-200 text-slate-800 focus:border-blue-950"
               }`}
             />
-            <div className="flex justify-between">
-              <p className="text-[10px] text-slate-400">This information assists underwriter verification of classification codes and risks.</p>
-              <p className="text-[10px] text-slate-400">{wcForm.businessDescription.length}/120</p>
-            </div>
+            <p className="text-[10px] text-slate-400 text-right">{wcForm.businessDescription.length}/120</p>
             {wcErrors.businessDescription && <p className="text-[10px] text-rose-500 font-bold mt-1">{wcErrors.businessDescription}</p>}
           </div>
         </div>
       </AccordionSection>
 
       <AccordionSection index={1} openSection={openSection} setOpenSection={setOpenSection} total={3} title="Location Risk Assessment" icon={<MapPin size={14} />}>
-        <p className="text-[11px] text-slate-500 -mt-2">
-          Specify risk details and limits required for each business location to be covered under the Workmen's Compensation policy.
-        </p>
-
         <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="space-y-0.5">
-            <label className="text-xs font-black text-slate-800">Number of Locations to Cover</label>
-            <p className="text-[11px] text-slate-500">Select how many physical corporate addresses require direct coverage.</p>
-          </div>
+          <label className="text-xs font-black text-slate-800">Number of Locations to Cover</label>
           <select
             value={wcForm.numberOfLocations}
             onChange={(e) => handleWcLocationCountChange(parseInt(e.target.value, 10))}
@@ -1252,10 +1240,6 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
           </button>
         }
       >
-        <p className="text-[11px] text-slate-500 -mt-2">
-          Covers, deductibles, extensions & limits of liability — declare total annual salaries and headcount for each occupation category.
-        </p>
-
         <div className="border border-slate-200 rounded-2xl overflow-hidden">
           <div className="bg-blue-900 text-white px-4 py-2.5 text-[10px] font-black uppercase tracking-widest">
             Workmen's Compensation and Employer's Liability
@@ -1374,11 +1358,11 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             {activeProduct}
           </h1>
-          <p className="text-slate-500 text-sm max-w-2xl mx-auto">
-            {activeKind === "UPLOAD"
-              ? "This cover doesn't have an online form. Download the underwriting pack, complete it, and upload it back below."
-              : "Fill out your insurance details online. Available corporate data is auto-filled for your convenience, and any missing values have been left strictly blank for your accurate inputs."}
-          </p>
+          {activeKind === "UPLOAD" && (
+            <p className="text-slate-500 text-sm max-w-2xl mx-auto">
+              Download the underwriting pack, complete it, and upload it back below.
+            </p>
+          )}
         </div>
 
         {/* Form Selector Tabs — one tab per selected cover, labelled with the
@@ -1408,25 +1392,6 @@ export const ApplicationFormView: React.FC<ApplicationFormViewProps> = ({
 
         {/* Main Interactive Form Card */}
         <div className="max-w-5xl mx-auto bg-white border border-slate-200 rounded-3xl shadow-xl overflow-hidden">
-          
-          {/* Form Top Banner */}
-          <div className="bg-blue-900 text-white px-6 sm:px-8 py-4 flex flex-wrap gap-4 items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <Sparkles size={16} className="text-yellow-400 fill-yellow-400/10" />
-              <div className="text-left">
-                <span className="text-xs font-black block leading-none">Invest in Dubai Registry Connected</span>
-                <span className="text-[10px] text-blue-200">Pre-filled values automatically synchronized & green-bordered</span>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <span className="bg-green-500/20 text-green-300 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-green-500/30">
-                100% Accurate
-              </span>
-              <span className="bg-blue-800 text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-full border border-blue-700">
-                Secure SSL
-              </span>
-            </div>
-          </div>
 
           {/* ======================= FORM 1: SME PROPOSAL FORM ======================= */}
           {selectedFormType === "SME" && (

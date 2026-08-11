@@ -104,13 +104,10 @@ export const ProceedOptionsView: React.FC<ProceedOptionsViewProps> = ({
         </div>
 
         {/* Page Titles */}
-        <div className="text-center max-w-2xl mx-auto space-y-2">
+        <div className="text-center max-w-2xl mx-auto">
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
             Tell Us Where Is Your Business Located
           </h1>
-          <p className="text-slate-500 text-sm">
-            These details apply across all your selected covers and affect your cover and premium.
-          </p>
         </div>
 
         {/* Location accordion */}
@@ -142,9 +139,6 @@ export const ProceedOptionsView: React.FC<ProceedOptionsViewProps> = ({
                         <option key={o} value={o}>{o}</option>
                       ))}
                     </select>
-                    <p className="text-[10px] text-slate-400 leading-snug">
-                      Select how you use this location (e.g. office, warehouse, retail shop, restaurant)
-                    </p>
                   </div>
                   <div className="space-y-1">
                     <div className="flex gap-2">
@@ -166,9 +160,6 @@ export const ProceedOptionsView: React.FC<ProceedOptionsViewProps> = ({
                         </button>
                       )}
                     </div>
-                    <p className="text-[10px] text-slate-400 leading-snug">
-                      Please enter the exact insured location – this affects your cover and premium.
-                    </p>
                   </div>
                   {idx < locations.length - 1 && <div className="md:col-span-2 border-b border-slate-100" />}
                 </div>
@@ -182,9 +173,6 @@ export const ProceedOptionsView: React.FC<ProceedOptionsViewProps> = ({
                 <Plus size={14} />
                 Add location
               </button>
-              <p className="text-[10px] text-slate-400">
-                Add each insured location where you operate (branches, outlets, warehouses, etc.)
-              </p>
             </div>
           )}
         </div>
@@ -206,9 +194,6 @@ export const ProceedOptionsView: React.FC<ProceedOptionsViewProps> = ({
                 <option key={t} value={t}>{t}</option>
               ))}
             </select>
-            <p className="text-[10px] text-slate-400 leading-snug">
-              Use your latest 12-month turnover figure in AED, including all UAE branches.
-            </p>
           </div>
 
           <div className="bg-white border border-slate-200/80 rounded-2xl p-5 space-y-2">
@@ -224,9 +209,6 @@ export const ProceedOptionsView: React.FC<ProceedOptionsViewProps> = ({
               placeholder="e.g. 25"
               className="w-full bg-white border border-slate-200 py-3 px-4 rounded-xl text-xs font-bold outline-none text-slate-800 focus:border-blue-950"
             />
-            <p className="text-[10px] text-slate-400 leading-snug">
-              Include all employees on your UAE payroll (full-time and part-time). Exclude contractors and freelancers.
-            </p>
           </div>
         </div>
 
